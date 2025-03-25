@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import LeftSideBar from "./components/LeftSideBar.tsx";
 
 const HomePage = () => {
   const storiesRef = useRef<HTMLDivElement>(null);
@@ -50,9 +51,11 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className="flex flex-row px-4 py-2">
+    <div className="flex flex-row py-2">
       {/* Left Side */}
-      <div className="w-1/4 border-2 border-red-500">left side</div>
+      <div className={`w-full sm:w-1/4 pr-0 sm:pr-4 `}>
+        <LeftSideBar isMobile={false} />
+      </div>
 
       {/* Content */}
       <div className="w-1/2 border-2 border-black">

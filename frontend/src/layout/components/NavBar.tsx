@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+
 import {
   Squares2X2Icon,
   ChatBubbleLeftIcon,
@@ -14,14 +16,24 @@ import groups from "/images/groupsfb.png";
 import gaming from "/images/gamingfb.png";
 
 const NavBar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [actived, setActived] = useState<string | null>(null);
 
-  const handleIconActived = (iconName: string) => {
-    if (actived === iconName) {
-      setActived(null);
-    } else {
-      setActived(iconName);
-    }
+  // Cập nhật thái actived dựa trên đường dẫn hiện tại
+  useEffect(() => {
+    const path = location.pathname;
+    if (path === "/") setActived("home");
+    else if (path === "/friends") setActived("friends");
+    else if (path === "/videos") setActived("videos");
+    else if (path === "/groups") setActived("groups");
+    else if (path === "/gaming") setActived("gaming");
+    else setActived(null);
+  }, [location.pathname]);
+  const handelIconClick = (iconName: string, path: string) => {
+    setActived(iconName);
+    navigate(path);
   };
 
   return (
@@ -44,7 +56,7 @@ const NavBar = () => {
                 ? "border-b-4 border-blue-600 "
                 : "border-b-4 border-transparent"
             }`}
-            onClick={() => handleIconActived("home")}
+            onClick={() => handelIconClick("home", "/")}
           >
             <img src={homefb} alt="Home" className="size-5 sm:size-6" />
           </div>
@@ -54,7 +66,7 @@ const NavBar = () => {
                 ? "border-b-4 border-blue-600"
                 : "border-b-4 border-transparent"
             }`}
-            onClick={() => handleIconActived("friends")}
+            onClick={() => handelIconClick("friends", "/friends")}
           >
             <img src={friends} alt="Friends" className="size-5 sm:size-6" />
           </div>
@@ -64,7 +76,7 @@ const NavBar = () => {
                 ? "border-b-4 border-blue-600"
                 : "border-b-4 border-transparent"
             }`}
-            onClick={() => handleIconActived("videos")}
+            onClick={() => handelIconClick("videos", "/videos")}
           >
             <img src={videos} alt="Videos" className="size-5 sm:size-6" />
           </div>
@@ -74,7 +86,7 @@ const NavBar = () => {
                 ? "border-b-4 border-blue-600"
                 : "border-b-4 border-transparent"
             }`}
-            onClick={() => handleIconActived("groups")}
+            onClick={() => handelIconClick("groups", "/groups")}
           >
             <img src={groups} alt="Groups" className="size-5 sm:size-6" />
           </div>
@@ -84,7 +96,7 @@ const NavBar = () => {
                 ? "border-b-4 border-blue-600"
                 : "border-b-4 border-transparent"
             }`}
-            onClick={() => handleIconActived("gaming")}
+            onClick={() => handelIconClick("gaming", "/gaming")}
           >
             <img src={gaming} alt="Gaming" className="size-5 sm:size-6" />
           </div>

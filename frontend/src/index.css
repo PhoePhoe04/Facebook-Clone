@@ -8,3 +8,28 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* Tùy chỉnh thanh cuộn */
+.custom-scrollbar {
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent; /* Màu thanh cuộn và nền */
+}
+
+/* Chrome, Edge, Safari */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px; /* Chiều rộng thanh cuộn */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* Nền của thanh cuộn */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #d1d5db; /* Màu thanh cuộn */
+  border-radius: 9999px; /* Bo góc */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af; /* Màu khi hover */
+}
