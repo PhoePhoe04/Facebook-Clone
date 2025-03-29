@@ -29,6 +29,7 @@ const NavBar = () => {
     else if (path === "/videos") setActived("videos");
     else if (path === "/groups") setActived("groups");
     else if (path === "/gaming") setActived("gaming");
+    else if (path === "/profile") setActived("profile");
     else setActived(null);
   }, [location.pathname]);
   const handelIconClick = (iconName: string, path: string) => {
@@ -114,7 +115,10 @@ const NavBar = () => {
           <button className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition">
             <BellIcon className="h-6 w-6 text-gray-800" />
           </button>
-          <button className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition">
+          <button
+            className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition"
+            onClick={() => handelIconClick("profile", "/profile")}
+          >
             <UserCircleIcon className="h-6 w-6 text-gray-800" />
           </button>
         </div>
