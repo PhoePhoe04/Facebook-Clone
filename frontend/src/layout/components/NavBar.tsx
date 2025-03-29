@@ -11,7 +11,7 @@ import {
 import fblogo from "/images/logo.png";
 import homefb from "/images/homefb.png";
 import friends from "/images/friendsfb.png";
-import videos from "/images/video.png";
+import videos from "/images/live_video.png";
 import groups from "/images/groupsfb.png";
 import gaming from "/images/gamingfb.png";
 
