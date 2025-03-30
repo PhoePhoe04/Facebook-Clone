@@ -5,8 +5,8 @@ const ProfilePost = () => {
   const [posts, setPosts] = useState([
     {
       id: 1,
-      name: "Người dùng 1",
-      avatar: "/images/dp1.png",
+      name: "Tên người dùng",
+      avatar: "/images/dp5.png",
       timestamp: "2 giờ trước",
       content: "Hôm nay là một ngày đẹp trời!",
       image: "/images/pic1.jpeg",
@@ -17,8 +17,8 @@ const ProfilePost = () => {
     },
     {
       id: 2,
-      name: "Người dùng 2",
-      avatar: "/images/dp2.png",
+      name: "Tên người dùng",
+      avatar: "/images/dp5.png",
       timestamp: "4 giờ trước",
       content: "Cảnh này thật tuyệt vời!",
       image: "/images/pic2.jpeg",
