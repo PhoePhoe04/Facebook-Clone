@@ -1,7 +1,9 @@
-
+import { useState } from "react";
 import ProfileTabs from './ProfileTabs';
 import ProfilePost from './ProfilePost';
-
+import ProfileFriend from "./ProfileFriend";
+import ProfilePhoto from "./ProfilePhoto";
+import ProfileAbout from "./ProfileAbout";
 // Giả lập dữ liệu người dùng
 const user = {
   name: 'Tên người dùng',
@@ -37,6 +39,8 @@ const friends = [
 ];
 
 const ProfilePage = () => {
+  const [activeMain, setActiveMain] = useState("Bài viết");
+  
   return (
     <div className="flex flex-col py-2 min-h-screen bg-white-fff">
       {/* Header */}
@@ -92,7 +96,7 @@ const ProfilePage = () => {
               </div>
 
               {/* Tabs điều hướng */}
-              <ProfileTabs />
+              <ProfileTabs setActiveMain={setActiveMain} activeMain={activeMain} />
             </div>
           </div>
         </div>
@@ -100,86 +104,93 @@ const ProfilePage = () => {
         {/* Phần bên phải (trống) */}
         <div className="w-1/5"></div>
       </div>
-      {/* Main */}
       <div className="main w-full flex mt-4">
         {/* Phần bên trái (trống) */}
         <div className="w-1/5"></div>
-        {/* Phần bên giữa */}
-        <div className="w-3/5 flex flex-row py-2 min-h-screen">
-          <div className="w-2/5 p-4 rounded-lg shadow-md">
-            {/* Giới thiệu */}
-            <div className="mb-4 border rounded-lg p-4 shadow-md bg-white">
-              <h2 className="text-lg font-bold mb-2">Giới thiệu</h2>
-              <button className="w-full bg-gray-200 text-black px-4 py-2 rounded-md mb-1">Thêm tiểu sử</button>
-              <button className="w-full bg-gray-200 text-black px-4 py-2 rounded-md mb-1">Chỉnh sửa chi tiết</button>
-              <button className="w-full bg-gray-200 text-black px-4 py-2 rounded-md">Thêm nội dung đáng chú ý</button>
-            </div>
-
-            {/* Ảnh */}
-            <div className="mb-4 border rounded-lg p-4 shadow-md bg-white">
-              <div className="flex justify-between items-center">
-                <h2 className="text-lg font-bold">Ảnh</h2>
-                <a href="#" className="text-blue-500">Xem tất cả ảnh</a>
+        {/* Nếu chọn "Bạn bè" thì chỉ hiển thị ProfileFriend, ẩn phần main */}
+        {activeMain === "Bạn bè" ? (
+          <ProfileFriend />
+        ) : activeMain === "Ảnh" ? ( // ✅ Hiển thị ProfilePhoto khi nhấn "Ảnh"
+          <ProfilePhoto />
+        ) : activeMain === "Giới thiệu" ? ( // ✅ Hiển thị ProfilePhoto khi nhấn "Ảnh"
+          <ProfileAbout />
+        ) : (
+          <div className="w-3/5 flex flex-row py-2 min-h-screen">
+            <div className="w-2/5 p-4 rounded-lg shadow-md">
+              {/* Giới thiệu */}
+              <div className="mb-4 border rounded-lg p-4 shadow-md bg-white">
+                <h2 className="text-lg font-bold mb-2">Giới thiệu</h2>
+                <button className="w-full bg-gray-200 text-black px-4 py-2 rounded-md mb-1">Thêm tiểu sử</button>
+                <button className="w-full bg-gray-200 text-black px-4 py-2 rounded-md mb-1">Chỉnh sửa chi tiết</button>
+                <button className="w-full bg-gray-200 text-black px-4 py-2 rounded-md">Thêm nội dung đáng chú ý</button>
               </div>
-              <div className="grid grid-cols-3 gap-2 mt-2">
-                {images.slice(0, 9).map((img, index) => (
-                  <img key={index} src={img} className="w-full h-40 object-cover rounded-md" />
-                ))}
+
+              {/* Ảnh */}
+              <div className="mb-4 border rounded-lg p-4 shadow-md bg-white">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-lg font-bold">Ảnh</h2>
+                  <a href="#" className="text-blue-500">Xem tất cả ảnh</a>
+                </div>
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  {images.slice(0, 9).map((img, index) => (
+                    <img key={index} src={img} className="w-full h-40 object-cover rounded-md" />
+                  ))}
+                </div>
+              </div>
+
+              {/* Bạn bè */}
+              <div className="mb-4 border rounded-lg p-4 shadow-md bg-white">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-lg font-bold">Bạn bè</h2>
+                  <a href="#" className="text-blue-500">Xem tất cả bạn bè</a>
+                </div>
+                <p className="text-gray-500">464 người bạn</p>
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  {friends.slice(0, 9).map((friend, index) => (
+                    <div key={index} className="text-center">
+                      <img src={friend.img} className="w-full h-30 object-cover rounded-md" />
+                      <p className="text-xs">{friend.name}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="w-3/5 p-4">
+              {/* Thanh nhập trạng thái */}
+            <div className="bg-white p-4 rounded-lg shadow-md flex items-center gap-2">
+              <img src={user.avatar} alt="Avatar" className="w-10 h-10 rounded-full" />
+              <input type="text" placeholder="Bạn đang nghĩ gì?" className="flex-1 p-2 border border-gray-300 rounded-full focus:outline-none" />
+            </div>
+
+            {/* Các tùy chọn đăng bài */}
+            <div className="flex justify-around bg-white p-3 mt-3 rounded-lg shadow-md">
+              <button className="flex items-center gap-2 text-gray-600 px-4 py-2 rounded-md border border-transparent transition-all duration-200 hover:bg-gray-300">
+                📷 Ảnh/Video
+              </button>
+              <button className="flex items-center gap-2 text-gray-600 px-4 py-2 rounded-md border border-transparent transition-all duration-200 hover:bg-gray-300">
+                🎥 Video trực tiếp
+              </button>
+              <button className="flex items-center gap-2 text-gray-600 px-4 py-2 rounded-md border border-transparent transition-all duration-200 hover:bg-gray-300">
+                📅 Sự kiện
+              </button>
+            </div>
+
+            {/* Tabs điều hướng bài viết */}
+            <div className="flex justify-between bg-white p-3 mt-3 rounded-lg shadow-md">
+              <div className="flex gap-4">
+                <label htmlFor="text" className="text-xl font-bold">Bài viết</label>
+              </div>
+              <div className="flex gap-2">
+                <button className="text-gray-600 cursor-pointer">⚙️ Bộ lọc</button>
+                <button className="text-gray-600 cursor-pointer">📁 Quản lý bài viết</button>
               </div>
             </div>
 
-            {/* Bạn bè */}
-            <div className="mb-4 border rounded-lg p-4 shadow-md bg-white">
-              <div className="flex justify-between items-center">
-                <h2 className="text-lg font-bold">Bạn bè</h2>
-                <a href="#" className="text-blue-500">Xem tất cả bạn bè</a>
-              </div>
-              <p className="text-gray-500">464 người bạn</p>
-              <div className="grid grid-cols-3 gap-2 mt-2">
-                {friends.slice(0, 9).map((friend, index) => (
-                  <div key={index} className="text-center">
-                    <img src={friend.img} className="w-full h-30 object-cover rounded-md" />
-                    <p className="text-xs">{friend.name}</p>
-                  </div>
-                ))}
-              </div>
+            {/* Danh sách bài viết */}
+            <ProfilePost />
             </div>
           </div>
-          <div className="w-3/5 p-4">
-            {/* Thanh nhập trạng thái */}
-          <div className="bg-white p-4 rounded-lg shadow-md flex items-center gap-2">
-            <img src={user.avatar} alt="Avatar" className="w-10 h-10 rounded-full" />
-            <input type="text" placeholder="Bạn đang nghĩ gì?" className="flex-1 p-2 border border-gray-300 rounded-full focus:outline-none" />
-          </div>
-
-          {/* Các tùy chọn đăng bài */}
-          <div className="flex justify-around bg-white p-3 mt-3 rounded-lg shadow-md">
-            <button className="flex items-center gap-2 text-gray-600 px-4 py-2 rounded-md border border-transparent transition-all duration-200 hover:bg-gray-300">
-              📷 Ảnh/Video
-            </button>
-            <button className="flex items-center gap-2 text-gray-600 px-4 py-2 rounded-md border border-transparent transition-all duration-200 hover:bg-gray-300">
-              🎥 Video trực tiếp
-            </button>
-            <button className="flex items-center gap-2 text-gray-600 px-4 py-2 rounded-md border border-transparent transition-all duration-200 hover:bg-gray-300">
-              📅 Sự kiện
-            </button>
-          </div>
-
-          {/* Tabs điều hướng bài viết */}
-          <div className="flex justify-between bg-white p-3 mt-3 rounded-lg shadow-md">
-            <div className="flex gap-4">
-              <label htmlFor="text" className="text-xl font-bold">Bài viết</label>
-            </div>
-            <div className="flex gap-2">
-              <button className="text-gray-600 cursor-pointer">⚙️ Bộ lọc</button>
-              <button className="text-gray-600 cursor-pointer">📁 Quản lý bài viết</button>
-            </div>
-          </div>
-
-          {/* Danh sách bài viết */}
-          <ProfilePost />
-          </div>
-        </div>
+        )}
         {/* Phần bên phải (trống) */}
         <div className="w-1/5"></div>
       </div>
