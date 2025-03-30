@@ -29,7 +29,7 @@ const RightSideBar = () => {
   return (
     <div className="bg-white rounded-lg shadow-md">
       {/* Tiêu đề và nút */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 px-2">
         <h2 className="text-lg font-semibold text-gray-800">Contacts</h2>
         <div className="flex items-center space-x-2">
           <button className="text-gray-500 hover:bg-gray-200 rounded-full p-1">
