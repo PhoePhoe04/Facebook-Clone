@@ -25,6 +25,7 @@ const NavBar = () => {
     if (path === "/") setActived("home");
     else if (path === "/friends") setActived("friends");
     else if (path === "/videos") setActived("videos");
+    else if (path === "/profile") setActived("profile");
     else setActived(null);
   }, [location.pathname]);
   const handelIconClick = (iconName: string, path: string) => {
@@ -95,7 +96,6 @@ const NavBar = () => {
               <UserCircleIcon className="h-6 w-6 text-gray-800" />
             </button>
           </div>
-        </div>
       </div>
     </div>
   );
