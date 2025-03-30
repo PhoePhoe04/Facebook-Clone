@@ -8,7 +8,7 @@ const LeftSideBar = ({ isMobile }: { isMobile: boolean }) => {
   const navigate = useNavigate();
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
