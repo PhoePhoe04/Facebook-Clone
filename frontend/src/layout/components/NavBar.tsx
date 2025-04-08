@@ -38,7 +38,7 @@ const NavBar = () => {
   };
 
   return (
-    <div className="flex w-full bg-white shadow-md px-4">
+    <div className="flex sticky top-0 z-50 w-full bg-white drop-shadow-md px-4">
       {/* left */}
       <div className="w-1/4 flex items-center justify-start space-x-4 ">
         <img src={fblogo} alt="logo" className="size-10" />
