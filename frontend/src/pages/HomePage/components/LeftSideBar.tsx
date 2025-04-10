@@ -1,32 +1,36 @@
 import { useState } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
+import { useNavigate } from "react-router-dom";
 
-const LeftSideBar = ({ isMobile }: { isMobile: boolean }) => {
+import spriteSheet from "/images/facebook-icon-sprite.png";
+
+const LeftSideBar = () => {
+  const navigate = useNavigate();
+
+  // Set mở rộng của menuItems
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
 
-  const toggleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
+  const handleIconClick = (path: string) => {
+    navigate(path);
   };
 
+  // Tính toán cho các icon của sprite
+  const calcHeight = (index: number) => {
+    return `-${index * 37}px`;
+  };
+
+  // Danh sách icon với 0 là trục y vì hình các icon xếp dọc chiều thẳng đứng
   const menuItems = [
-    { icon: "👤", label: "Huỳnh Phúc Duy" },
-    { icon: "👥", label: "Friends" },
-    { icon: "⏰", label: "Memories" },
-    { icon: "💾", label: "Saved" },
-    { icon: "👥", label: "Groups" },
-    { icon: "📹", label: "Video" },
-    { icon: "🏪", label: "Marketplace" },
-    { icon: "📡", label: "Feeds" },
-    { icon: "🎉", label: "Events" },
-    { icon: "📅", label: "Pages" },
-    { icon: "🎮", label: "Gaming" },
-    { icon: "💼", label: "Jobs" },
-    { icon: "🔔", label: "Notifications" },
+    { position: `0 ${calcHeight(9)}`, label: "Friends", path: "/friends" },
+    { position: `0 ${calcHeight(13)}`, label: "Memmories", path: "/" },
+    { position: `0 ${calcHeight(5)}`, label: "Saved", path: "/" },
+    { position: `0 ${calcHeight(1)}`, label: "Groups", path: "/" },
+    { position: `0 ${calcHeight(15)}`, label: "Videos", path: "/" },
+    { position: `0 ${calcHeight(12)}`, label: "Marketplace", path: "/" },
   ];
 
   // Chỉ hiển thị 5 item nếu chưa mở rộng
@@ -34,22 +38,25 @@ const LeftSideBar = ({ isMobile }: { isMobile: boolean }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-2">
-      {isMobile && (
-        <button onClick={toggleCollapse} className="mb-4 text-gray-600">
-          {isCollapsed ? "Show Menu" : "Hide Menu"}
-        </button>
-      )}
-
-      <div className={isMobile && isCollapsed ? "hidden" : "block"}>
+      <div className={"block"}>
         {/* Thanh cuộn tùy chỉnh */}
         <div className="max-h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar">
-          <ul className="p-2">
+          <ul className="">
             {displayedItems.map((item, index) => (
               <li
+                onClick={() => handleIconClick(item.path)}
                 key={index}
-                className="flex items-center space-x-2 cursor-pointer hover:bg-gray-100 p-2 rounded"
+                className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-100 rounded"
               >
-                <img src={item.icon} alt="" className="size-8 rounded-full" />
+                {/* Icon từ sprite sheet */}
+                <div
+                  className="h-[37px] w-[37px]" // Kích thước icon: 37x37px
+                  style={{
+                    backgroundImage: `url(${spriteSheet})`,
+                    backgroundPosition: item.position,
+                    backgroundSize: "37px auto", // Chiều rộng sprite sheet: 37px
+                  }}
+                />
                 <span>{item.label}</span>
               </li>
             ))}
@@ -59,16 +66,20 @@ const LeftSideBar = ({ isMobile }: { isMobile: boolean }) => {
         {/* Nút See More */}
         <button
           onClick={toggleExpand}
-          className="flex items-center space-x-2 mx-2 p-2 rounded-lg hover:bg-gray-100 w-full"
+          className="flex items-center mt-2 space-x-2 rounded-lg hover:bg-gray-100 w-full"
         >
           {isExpanded ? (
             <>
-              <ChevronUpIcon className="size-8 bg-gray-300 rounded-full p-2 " />
+              <div className="p-2">
+                <ChevronUpIcon className="h-[37px] w-[37px] bg-gray-300 rounded-full " />
+              </div>
               <span>See Less</span>
             </>
           ) : (
             <>
-              <ChevronDownIcon className="size-8 bg-gray-300 rounded-full p-2" />
+              <div className="p-2">
+                <ChevronDownIcon className="h-[37px] w-[37px] bg-gray-300 rounded-full" />
+              </div>
               <span>See More</span>
             </>
           )}

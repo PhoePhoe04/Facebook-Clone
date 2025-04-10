@@ -9,7 +9,7 @@ const MainLayout = () => {
       <NavBar />
 
       {/* Content */}
-      <div className=" bg-gray-100 text-black flex flex-col min-h-screen">
+      <div className="bg-gray-100 text-black flex flex-col min-h-screen pt-14 pb-0 sm:pb-0">
         <Outlet />
       </div>
 
