@@ -96,6 +96,7 @@ const NavBar = () => {
               <UserCircleIcon className="h-6 w-6 text-gray-800" />
             </button>
           </div>
+        </div>
       </div>
     </div>
   );
