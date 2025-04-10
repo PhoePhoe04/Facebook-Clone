@@ -80,9 +80,9 @@ const NavBar = () => {
             >
               <img src={videos} alt="Videos" className="size-5 sm:size-6" />
             </div>
+
           </div>
         </div>
-
         {/* Right */}
         <div className="w-1/4 flex items-center justify-end">
           <div className="flex items-center space-x-2 sm:space-x-4">
