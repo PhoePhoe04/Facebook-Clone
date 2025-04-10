@@ -4,18 +4,14 @@ import { useNavigate } from "react-router-dom";
 
 import spriteSheet from "/images/facebook-icon-sprite.png";
 
-const LeftSideBar = ({ isMobile }: { isMobile: boolean }) => {
+const LeftSideBar = () => {
   const navigate = useNavigate();
 
+  // Set mở rộng của menuItems
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
-  };
-
-  const toggleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
   };
 
   const handleIconClick = (path: string) => {
@@ -42,13 +38,7 @@ const LeftSideBar = ({ isMobile }: { isMobile: boolean }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-2">
-      {isMobile && (
-        <button onClick={toggleCollapse} className="mb-4 text-gray-600">
-          {isCollapsed ? "Show Menu" : "Hide Menu"}
-        </button>
-      )}
-
-      <div className={isMobile && isCollapsed ? "hidden" : "block"}>
+      <div className={"block"}>
         {/* Thanh cuộn tùy chỉnh */}
         <div className="max-h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar">
           <ul className="">

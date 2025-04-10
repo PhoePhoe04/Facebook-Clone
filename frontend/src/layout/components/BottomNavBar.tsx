@@ -3,9 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import homefb from "/images/homefb.png";
 import friends from "/images/friendsfb.png";
-import videos from "/images/live_video.png";
-import groups from "/images/groupsfb.png";
-import gaming from "/images/gamingfb.png";
+import videos from "/images/ic_video2.png";
 
 const BottomNavBar = () => {
   const navigate = useNavigate();
@@ -18,8 +16,6 @@ const BottomNavBar = () => {
     if (path === "/") setActived("home");
     else if (path === "/friends") setActived("friends");
     else if (path === "/videos") setActived("videos");
-    else if (path === "/groups") setActived("groups");
-    else if (path === "/gaming") setActived("gaming");
   });
 
   const hanldleIconClick = (iconName: string, path: string) => {
@@ -59,26 +55,6 @@ const BottomNavBar = () => {
           onClick={() => hanldleIconClick("videos", "/videos")}
         >
           <img src={videos} alt="Videos" className="size-5 sm:size-6" />
-        </div>
-        <div
-          className={`p-2 sm:p-3.5 cursor-pointer flex-1 flex justify-center hover:bg-gray-300 transition-colors ${
-            actived === "groups"
-              ? "border-b-4 border-blue-600"
-              : "border-b-4 border-transparent"
-          }`}
-          onClick={() => hanldleIconClick("groups", "/groups")}
-        >
-          <img src={groups} alt="Groups" className="size-5 sm:size-6" />
-        </div>
-        <div
-          className={`p-2 sm:p-3.5 cursor-pointer flex-1 flex justify-center hover:bg-gray-300 transition-colors ${
-            actived === "gaming"
-              ? "border-b-4 border-blue-600"
-              : "border-b-4 border-transparent"
-          }`}
-          onClick={() => hanldleIconClick("gaming", "/gaming")}
-        >
-          <img src={gaming} alt="Gaming" className="size-5 sm:size-6" />
         </div>
       </div>
     </div>
