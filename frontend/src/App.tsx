@@ -11,11 +11,14 @@ import RegisterPage from "./pages/Login and Register/RegisterPage";
 import ProfileFriend from "./pages/ProfilePage/ProfileFriend";
 import ProfilePhoto from "./pages/ProfilePage/ProfilePhoto";
 import ProfileAbout from "./pages/ProfilePage/ProfileAbout";
+    
+import AdminDashboard from "./pages/AdminPage/AdminPage";
 
 function App() {
   return (
     <>
       <Routes>
+        {/* Route dành cho giao diện người dùng */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route element={<MainLayout />}>
@@ -31,6 +34,9 @@ function App() {
           </Route>
           <Route path="*" element={<div>404</div>} />
         </Route>
+        
+        {/* Route dành riêng cho Admin */}
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </>
   );
