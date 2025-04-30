@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useRef } from "react";
 import ProfileTabs from './ProfileTabs';
 import ProfilePost from './ProfilePost';
 import ProfileFriend from "./ProfileFriend";
@@ -38,9 +38,43 @@ const friends = [
   { name: "Friend 10", img: "/images/dp2.png" },
 ];
 
+const aboutData = {
+  education: {
+    school: "Trường Đại học Sài Gòn",
+    started: 2022,
+  },
+  currentCity: "Hàm Tân",
+  hometown: "Lagi, Thuận Hải, Vietnam",
+  phone: "034 572 6227",
+};
+
+
 const ProfilePage = () => {
   const [activeMain, setActiveMain] = useState("Bài viết");
+  const mediaInputRef = useRef<HTMLInputElement | null>(null); // Tạo ref cho input
+
+  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      console.log(previewUrl); // Bạn có thể xử lý file ở đây
+    }
+  };
+
+  const handleMediaButtonClick = () => {
+    mediaInputRef.current?.click(); // Mở hộp thoại chọn tệp
+  };
   
+  const [coverImage, setCoverImage] = useState('/images/GYuWtZPXkAAA6WT.jpg'); // Ảnh bìa mặc định
+
+  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const previewUrl = URL.createObjectURL(file); // Tạo URL cho ảnh mới
+      setCoverImage(previewUrl); // Cập nhật ảnh bìa
+    }
+  };
+
   return (
     <div className="flex flex-col py-2 min-h-screen bg-white-fff">
       {/* Header */}
@@ -54,7 +88,7 @@ const ProfilePage = () => {
             {/* Phần ảnh bìa và ảnh đại diện */}
             <div className="relative">
               {/* Ảnh bìa */}
-              <img src={user.coverImage} alt="" className="w-full h-72 object-cover" />
+              <img src={coverImage} alt="Cover" className="w-full h-72 object-cover" />
               {/* Nút chỉnh sửa ảnh bìa */}
               <button className="absolute top-4 right-4 bg-white text-black px-3 py-1 rounded-md flex items-center gap-2 shadow-md">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -63,12 +97,18 @@ const ProfilePage = () => {
                 </svg>
                 Chỉnh sửa ảnh bìa
               </button>
+              {/* Input để chọn ảnh bìa mới */}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleCoverImageChange}
+                className="absolute top-4 right-4 opacity-0 w-16 h-16"
+              />
               {/* Ảnh đại diện */}
               <div className="absolute -bottom-16 left-4">
                 <img src={user.avatar} alt="Avatar" className="w-48 h-48 rounded-full border-4 border-gray-900 object-cover" />
               </div>
             </div>
-
             {/* Phần thông tin người dùng */}
             <div className="mt-20 px-4">
               <div className="flex justify-between items-center">
@@ -77,21 +117,12 @@ const ProfilePage = () => {
                   <p className="text-gray-400">{user.postsCount} người bạn</p>
                 </div>
                 <div className="flex gap-2">
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-md">
-                    + Thêm vào tin
-                  </button>
-                  <button className="bg-white text-black px-4 py-2 rounded-md flex items-center gap-2 shadow-md">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                    </svg>
-                    Nhắn tin
-                  </button>
-
-                  <button className="bg-white text-black px-2 py-2 rounded-md shadow-md">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
+                <button className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2 shadow-md hover:bg-blue-700 transition">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                  </svg>
+                  Nhắn tin
+                </button>
                 </div>
               </div>
 
@@ -113,23 +144,29 @@ const ProfilePage = () => {
         ) : activeMain === "Ảnh" ? ( // ✅ Hiển thị ProfilePhoto khi nhấn "Ảnh"
           <ProfilePhoto />
         ) : activeMain === "Giới thiệu" ? ( // ✅ Hiển thị ProfilePhoto khi nhấn "Ảnh"
-          <ProfileAbout />
+          <ProfileAbout/>
         ) : (
           <div className="w-3/5 flex flex-row py-2 min-h-screen">
             <div className="w-2/5 p-4 rounded-lg shadow-md">
               {/* Giới thiệu */}
               <div className="mb-4 border rounded-lg p-4 shadow-md bg-white">
                 <h2 className="text-lg font-bold mb-2">Giới thiệu</h2>
-                <button className="w-full bg-gray-200 text-black px-4 py-2 rounded-md mb-1">Thêm tiểu sử</button>
-                <button className="w-full bg-gray-200 text-black px-4 py-2 rounded-md mb-1">Chỉnh sửa chi tiết</button>
-                <button className="w-full bg-gray-200 text-black px-4 py-2 rounded-md">Thêm nội dung đáng chú ý</button>
+                <ul className="list-none p-0 text-sm text-gray-700">
+                  <li className="mb-1">🎓 Học tại {aboutData.education.school}</li>
+                  <li className="mb-1">🏠 Sống tại {aboutData.currentCity}</li>
+                  <li className="mb-1">📍 Đến từ {aboutData.hometown}</li>
+                  <li className="mb-1">📞 {aboutData.phone}</li>
+                </ul>
               </div>
+
 
               {/* Ảnh */}
               <div className="mb-4 border rounded-lg p-4 shadow-md bg-white">
                 <div className="flex justify-between items-center">
                   <h2 className="text-lg font-bold">Ảnh</h2>
-                  <a href="#" className="text-blue-500">Xem tất cả ảnh</a>
+                  <button onClick={() => setActiveMain("Ảnh")} className="text-blue-500 hover:underline">
+                    Xem tất cả ảnh
+                  </button>
                 </div>
                 <div className="grid grid-cols-3 gap-2 mt-2">
                   {images.slice(0, 9).map((img, index) => (
@@ -142,7 +179,9 @@ const ProfilePage = () => {
               <div className="mb-4 border rounded-lg p-4 shadow-md bg-white">
                 <div className="flex justify-between items-center">
                   <h2 className="text-lg font-bold">Bạn bè</h2>
-                  <a href="#" className="text-blue-500">Xem tất cả bạn bè</a>
+                  <button onClick={() => setActiveMain("Bạn bè")} className="text-blue-500 hover:underline">
+                    Xem tất cả bạn bè
+                  </button>
                 </div>
                 <p className="text-gray-500">464 người bạn</p>
                 <div className="grid grid-cols-3 gap-2 mt-2">
@@ -164,17 +203,25 @@ const ProfilePage = () => {
 
             {/* Các tùy chọn đăng bài */}
             <div className="flex justify-around bg-white p-3 mt-3 rounded-lg shadow-md">
-              <button className="flex items-center gap-2 text-gray-600 px-4 py-2 rounded-md border border-transparent transition-all duration-200 hover:bg-gray-300">
+              <button
+                className="flex items-center gap-2 text-gray-600 px-4 py-2 rounded-md border border-transparent transition-all duration-200 hover:bg-gray-300"
+                onClick={handleMediaButtonClick}
+              >
                 📷 Ảnh/Video
               </button>
-              <button className="flex items-center gap-2 text-gray-600 px-4 py-2 rounded-md border border-transparent transition-all duration-200 hover:bg-gray-300">
-                🎥 Video trực tiếp
-              </button>
+
+              <input
+                ref={mediaInputRef} // Gán ref vào input
+                id="mediaInput"
+                type="file"
+                accept="image/*,video/*"
+                onChange={handleMediaChange}
+                style={{ display: 'none' }} // Ẩn input file
+              />
               <button className="flex items-center gap-2 text-gray-600 px-4 py-2 rounded-md border border-transparent transition-all duration-200 hover:bg-gray-300">
                 📅 Sự kiện
               </button>
             </div>
-
             {/* Tabs điều hướng bài viết */}
             <div className="flex justify-between bg-white p-3 mt-3 rounded-lg shadow-md">
               <div className="flex gap-4">
