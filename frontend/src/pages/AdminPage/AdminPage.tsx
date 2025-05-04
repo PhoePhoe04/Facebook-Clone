@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import UserManagement from "./UserManagement";
-import TextPostManagement from "./TextPostManagement";
+import UserManagement from "./UserManagementPage";
+import TextPostManagement from "./PostManagementPage";
 import StatisticPage from "./StatisticPage";
 import HomeDashboard from "./HomeDashBoard";
+import InteractionManagementPage from "./InteractionManagementPage";
 
 const AdminDashboard: React.FC = () => {
   const [activeContent, setActiveContent] = useState<string>("Home");
@@ -77,6 +78,7 @@ const AdminDashboard: React.FC = () => {
         {activeContent === "Home" && <HomeDashboard />}
         {activeContent === "Quản lý người dùng" && <UserManagement />}
         {activeContent === "Quản lý bài đăng" && <TextPostManagement />}
+        {activeContent === "Quản lý tương tác" && <InteractionManagementPage />}
         {activeContent === "Thống kê" && <StatisticPage />}
       </main>
     </div>

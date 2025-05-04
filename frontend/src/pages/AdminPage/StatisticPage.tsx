@@ -67,7 +67,9 @@ const StatisticPage: React.FC = () => {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Thống Kê Biểu Đồ</h1>
+      <div style={styles.panel}>
+        <h1 style={styles.title}>Thống Kê Biểu Đồ</h1>
+      </div>
       {/* Chọn loại thống kê */}
       <div style={styles.controls}>
         <label style={styles.label}>
@@ -104,12 +106,18 @@ const styles: { [key: string]: React.CSSProperties } = {
     borderRadius: "8px",
     boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
   },
-  title: {
-    fontSize: "24px",
-    fontWeight: "bold",
-    color: "#34495e",
-    textAlign: "center",
+  panel: {
+    backgroundColor: "#f5f5f5",
+    padding: "10px 20px",
     marginBottom: "20px",
+    borderRadius: "8px",
+    boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+  },
+  panelTitle: {
+    margin: 0,
+    fontSize: "18px",
+    fontWeight: "bold",
+    color: "#333",
   },
   controls: {
     display: "flex",
