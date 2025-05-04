@@ -1,9 +1,10 @@
-import { useState,useRef } from "react";
+import { useState } from "react";
 import ProfileTabs from './ProfileTabs';
 import ProfilePost from './ProfilePost';
 import ProfileFriend from "./ProfileFriend";
 import ProfilePhoto from "./ProfilePhoto";
 import ProfileAbout from "./ProfileAbout";
+import PostModal from "./PostModal";
 // Giả lập dữ liệu người dùng
 const user = {
   name: 'Tên người dùng',
@@ -48,32 +49,34 @@ const aboutData = {
   phone: "034 572 6227",
 };
 
-
 const ProfilePage = () => {
   const [activeMain, setActiveMain] = useState("Bài viết");
-  const mediaInputRef = useRef<HTMLInputElement | null>(null); // Tạo ref cho input
-
-  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      console.log(previewUrl); // Bạn có thể xử lý file ở đây
-    }
-  };
-
-  const handleMediaButtonClick = () => {
-    mediaInputRef.current?.click(); // Mở hộp thoại chọn tệp
-  };
   
-  const [coverImage, setCoverImage] = useState('/images/GYuWtZPXkAAA6WT.jpg'); // Ảnh bìa mặc định
+  const [coverImage, setCoverImage] = useState('/images/GYuWtZPXkAAA6WT.jpg');
 
-  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
+  const handleCoverImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const previewUrl = URL.createObjectURL(file); // Tạo URL cho ảnh mới
-      setCoverImage(previewUrl); // Cập nhật ảnh bìa
+      const formData = new FormData();
+      formData.append("file", file);
+  
+      try {
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json();
+        setCoverImage(data.url); // URL ảnh từ server
+      } catch (error) {
+        console.error("Upload failed", error);
+      }
     }
-  };
+  };  
 
   return (
     <div className="flex flex-col py-2 min-h-screen bg-white-fff">
@@ -90,7 +93,7 @@ const ProfilePage = () => {
               {/* Ảnh bìa */}
               <img src={coverImage} alt="Cover" className="w-full h-72 object-cover" />
               {/* Nút chỉnh sửa ảnh bìa */}
-              <button className="absolute top-4 right-4 bg-white text-black px-3 py-1 rounded-md flex items-center gap-2 shadow-md">
+              <button className="absolute top-4 right-4 bg-white text-black px-3 py-1 rounded-md flex items-center gap-2 shadow-md cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6" />
@@ -196,45 +199,47 @@ const ProfilePage = () => {
             </div>
             <div className="w-3/5 p-4">
               {/* Thanh nhập trạng thái */}
-            <div className="bg-white p-4 rounded-lg shadow-md flex items-center gap-2">
-              <img src={user.avatar} alt="Avatar" className="w-10 h-10 rounded-full" />
-              <input type="text" placeholder="Bạn đang nghĩ gì?" className="flex-1 p-2 border border-gray-300 rounded-full focus:outline-none" />
-            </div>
-
-            {/* Các tùy chọn đăng bài */}
-            <div className="flex justify-around bg-white p-3 mt-3 rounded-lg shadow-md">
-              <button
-                className="flex items-center gap-2 text-gray-600 px-4 py-2 rounded-md border border-transparent transition-all duration-200 hover:bg-gray-300"
-                onClick={handleMediaButtonClick}
-              >
-                📷 Ảnh/Video
-              </button>
-
-              <input
-                ref={mediaInputRef} // Gán ref vào input
-                id="mediaInput"
-                type="file"
-                accept="image/*,video/*"
-                onChange={handleMediaChange}
-                style={{ display: 'none' }} // Ẩn input file
-              />
-              <button className="flex items-center gap-2 text-gray-600 px-4 py-2 rounded-md border border-transparent transition-all duration-200 hover:bg-gray-300">
-                📅 Sự kiện
-              </button>
-            </div>
-            {/* Tabs điều hướng bài viết */}
-            <div className="flex justify-between bg-white p-3 mt-3 rounded-lg shadow-md">
-              <div className="flex gap-4">
-                <label htmlFor="text" className="text-xl font-bold">Bài viết</label>
+              <div className="bg-white p-4 rounded-lg shadow-md flex items-center gap-2">
+                <img src={user.avatar} alt="Avatar" className="w-10 h-10 rounded-full" />
+                <input
+                  type="text"
+                  placeholder="Bạn đang nghĩ gì?"
+                  onClick={openModal}
+                  className="flex-1 p-2 border border-gray-300 rounded-full focus:outline-none cursor-pointer"
+                  readOnly
+                />
               </div>
-              <div className="flex gap-2">
-                <button className="text-gray-600 cursor-pointer">⚙️ Bộ lọc</button>
-                <button className="text-gray-600 cursor-pointer">📁 Quản lý bài viết</button>
-              </div>
-            </div>
 
-            {/* Danh sách bài viết */}
-            <ProfilePost />
+              {/* Các tùy chọn đăng bài */}
+              <div className="flex justify-around bg-white p-3 mt-3 rounded-lg shadow-md">
+                <button
+                  onClick={openModal}
+                  className="flex items-center gap-2 text-gray-600 px-4 py-2 rounded-md border border-transparent transition-all duration-200 hover:bg-gray-300"
+                >
+                  📷 Ảnh/Video
+                </button>
+
+                <button
+                  onClick={openModal}
+                  className="flex items-center gap-2 text-gray-600 px-4 py-2 rounded-md border border-transparent transition-all duration-200 hover:bg-gray-300"
+                >
+                  📅 Sự kiện
+                </button>
+              </div>
+              {/* Modal hiển thị */}
+              <PostModal isOpen={isModalOpen} onClose={closeModal} />
+              {/* Tabs điều hướng bài viết */}
+              <div className="flex justify-between bg-white p-3 mt-3 rounded-lg shadow-md">
+                <div className="flex gap-4">
+                  <label htmlFor="text" className="text-xl font-bold">Bài viết</label>
+                </div>
+                <div className="flex gap-2">
+                  <button className="text-gray-600 cursor-pointer">⚙️ Bộ lọc</button>
+                  <button className="text-gray-600 cursor-pointer">📁 Quản lý bài viết</button>
+                </div>
+              </div>
+              {/* Danh sách bài viết */}
+              <ProfilePost />
             </div>
           </div>
         )}

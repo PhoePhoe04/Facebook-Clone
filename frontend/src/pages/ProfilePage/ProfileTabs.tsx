@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 
 const ProfileTabs = ({ setActiveMain, activeMain }: { setActiveMain: (tab: string) => void; activeMain: string }) => {
-  const tabs = ["Bài viết", "Giới thiệu", "Bạn bè", "Ảnh", "Video"];
+  const tabs = ["Bài viết", "Giới thiệu", "Bạn bè", "Ảnh"];
   const navigate = useNavigate(); // ✅ Khai báo useNavigate
 
   const handleTabClick = (tab: string) => {
