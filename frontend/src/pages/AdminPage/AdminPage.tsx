@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import UserManagement from "./UserManagementPage";
 import TextPostManagement from "./PostManagementPage";
-import StatisticPage from "./StatisticPage";
 import HomeDashboard from "./HomeDashBoard";
-import InteractionManagementPage from "./InteractionManagementPage";
 
 const AdminDashboard: React.FC = () => {
   const [activeContent, setActiveContent] = useState<string>("Home");
@@ -56,20 +54,6 @@ const AdminDashboard: React.FC = () => {
           >
             Quản lý bài đăng
           </li>
-          <li
-            style={styles.menuItem}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor =
-                styles.menuItemHover.backgroundColor)
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor =
-                styles.menuItem.backgroundColor)
-            }
-            onClick={() => setActiveContent("Thống kê")}
-          >
-            Thống kê
-          </li>
         </ul>
       </aside>
 
@@ -78,8 +62,6 @@ const AdminDashboard: React.FC = () => {
         {activeContent === "Home" && <HomeDashboard />}
         {activeContent === "Quản lý người dùng" && <UserManagement />}
         {activeContent === "Quản lý bài đăng" && <TextPostManagement />}
-        {activeContent === "Quản lý tương tác" && <InteractionManagementPage />}
-        {activeContent === "Thống kê" && <StatisticPage />}
       </main>
     </div>
   );
