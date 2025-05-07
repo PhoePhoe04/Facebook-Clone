@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 
 const ProfileTabs = ({ setActiveMain, activeMain }: { setActiveMain: (tab: string) => void; activeMain: string }) => {
-  const tabs = ["Bài viết", "Giới thiệu", "Bạn bè", "Ảnh"];
+  const tabs = ["Bài viết", "Bạn bè", "Ảnh"];
   const navigate = useNavigate(); // ✅ Khai báo useNavigate
 
   const handleTabClick = (tab: string) => {
@@ -10,8 +10,6 @@ const ProfileTabs = ({ setActiveMain, activeMain }: { setActiveMain: (tab: strin
       navigate("/profile/friend"); // ✅ Chuyển hướng đến /profile/friend khi nhấn vào "Bạn bè"
     } else if (tab === "Ảnh") {
       navigate("/profile/photo"); // ✅ Chuyển hướng đến /profile/photo khi nhấn vào "Ảnh"
-    } else if (tab === "Giới thiệu") {
-      navigate("/profile/about"); // ✅ Chuyển hướng đến /profile/photo khi nhấn vào "Ảnh"
     } else {
       navigate("/profile"); // ✅ Chuyển hướng về /profile cho các tab khác
     }

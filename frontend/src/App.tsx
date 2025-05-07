@@ -10,7 +10,6 @@ import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import RegisterPage from "./pages/Login and Register/RegisterPage";
 import ProfileFriend from "./pages/ProfilePage/ProfileFriend";
 import ProfilePhoto from "./pages/ProfilePage/ProfilePhoto";
-import ProfileAbout from "./pages/ProfilePage/ProfileAbout";
     
 import AdminDashboard from "./pages/AdminPage/AdminPage";
 
@@ -30,7 +29,6 @@ function App() {
           <Route path="/profile" element={<ProfilePage />}>
             <Route path="friend" element={<ProfileFriend />} />
             <Route path="photo" element={<ProfilePhoto />} />
-            <Route path="about" element={<ProfileAbout />} />
           </Route>
           <Route path="*" element={<div>404</div>} />
         </Route>
