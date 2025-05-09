@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import axios, { AxiosError } from "axios";
 
 // Define the structure for a User object based on backend response
@@ -19,14 +19,27 @@ interface User {
     posts?: any[]; // Example: if backend returns posts, make it optional
 }
 
+interface Friendship {
+    id: number;
+    requester: User;
+    receiver: User;
+    status: string;
+    createdAt: string;
+}
+
 const UserManagement: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
+    const [friends, setFriends] = useState<Friendship[]>([]);
+
     const [showAddUserForm, setShowAddUserForm] = useState(false);
     const [showEditUserForm, setShowEditUserForm] = useState(false);
     // selectedAvatarFile now holds the resized Blob/File
     const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
     const [selectedUserForDetails, setSelectedUserForDetails] = useState<User | null>(null);
+    const [selectedUserForFriendship, setSelectedUserForFriendship] = useState<User | null>(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
+    const [showUserFriends, setShowUserFriends] = useState(false);
+    const [showUserAddFriends, setShowUserAddFriends] = useState(false);
 
     const [error, setError] = useState<string>("");
     const [validateError, setValidateError] = useState<{ [key: string]: string }>({});
@@ -35,18 +48,47 @@ const UserManagement: React.FC = () => {
     const [name, setName] = useState<string>("");
     const [email, setEmail] = useState<string>("");
     const [bio, setBio] = useState<string>("");
-    // Password state should be empty for edit form initially
     const [password, setPassword] = useState<string>("");
-    // avatarUrl state is likely not needed if using Base64/BLOB storage
-    // const [avatarUrl, setAvatarUrl] = useState<string>(""); // Removed or keep if needed for other logic
-    // Initialize status state with the default value "Active"
     const [status, setStatus] = useState<string>("Active");
 
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [filterStatus, setFilterStatus] = useState<string>("All");
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isHovered, setIsHovered] = useState<boolean>();
+    // Dùng để thay đổi trạng thái nút cho mỗi người dùng trong form thêm bạn bè
+    const [addFriendButtonStates, setAddFriendButtonStates] = useState<{
+        [userId: number]: { text: string; disabled: boolean };
+    }>({});
     const usersPerPage = 5;
+
+    const listAddFriend = useMemo(() => {
+        if(!selectedUserForFriendship) {
+            return [];
+        }
+
+        const connectedUserIds = new Set<number>();
+        friends.forEach(friendship => {
+            if(friendship.requester.id === selectedUserForFriendship.id) {
+                connectedUserIds.add(friendship.receiver.id);
+            } else if(friendship.receiver.id === selectedUserForFriendship.id) {
+                connectedUserIds.add(friendship.requester.id);
+            }
+        });
+        return users.filter(user => user.id !== selectedUserForFriendship.id && !connectedUserIds.has(user.id));
+    }, [users, friends, selectedUserForFriendship]);
+
+    // Dùng để khởi tạo text cho nút là Thêm và trạng thái disabled cho nút là false
+    useEffect(() => {
+        const initialButtonStates: { [userId: number]: { text: string; disabled: boolean } } = {};
+        listAddFriend.forEach(user => {
+            initialButtonStates[user.id] = {
+                text: 'Thêm',
+                disabled: false,
+            };
+        });
+        setAddFriendButtonStates(initialButtonStates);
+    }, [listAddFriend]);
 
     // Lấy avatar
     const getAvatarSrc = (user: User): string => {
@@ -170,10 +212,10 @@ const UserManagement: React.FC = () => {
                 }
             }
             // Nếu ảnh nhỏ hơn kích thước tối đa, giữ nguyên kích thước
-            // else {
-            //     // width = img.width;
-            //     // height = img.height;
-            // }
+            else {
+                width = img.width;
+                height = img.height;
+            }
 
 
             // Đặt kích thước cho canvas
@@ -263,7 +305,6 @@ const UserManagement: React.FC = () => {
                       password: user.password || undefined // Password should be optional/undefined
                   }))
                 : [];
-            console.log("Fetched and processed users:", data);
             setUsers(data); // Update users state
         } catch (error) {
             console.error("API error fetching users:", error);
@@ -286,24 +327,14 @@ const UserManagement: React.FC = () => {
         const addForm = new FormData();
         addForm.append('name', name);
         addForm.append('email', email);
-        // WARNING: Password should be hashed on backend, sending plain text is insecure.
         addForm.append('password', password);
-        // Ensure bio is appended, handle if it's an empty string
         addForm.append('bio', bio || ''); // Send empty string if bio state is empty
-        // --- Logging status value before appending ---
-        console.log("Value of status state before appending to FormData (AddUser):", status);
-        // --- End Logging ---
         addForm.append('status', status); // Append the current value of the 'status' state
 
         // Append the selected avatar file (đã resize/process) if it exists.
         // selectedAvatarFile is a File object created from the resized Blob
         if(selectedAvatarFile) {
-            // Append File object to FormData. Backend expects 'avatarFile'.
-            // The third argument is the filename, useful for backend.
             addForm.append('avatarFile', selectedAvatarFile, selectedAvatarFile.name);
-            console.log("Avatar file appended to FormData (AddUser):", selectedAvatarFile.name, selectedAvatarFile.type, (selectedAvatarFile.size / 1024).toFixed(2) + " KB");
-        } else {
-            console.log("No avatar file selected or processed for AddUser.");
         }
 
         try {
@@ -334,33 +365,71 @@ const UserManagement: React.FC = () => {
 
         } catch (err) {
             console.error("AddUser API error:", err);
-            let errorMessage = "Đăng ký không thành công. Vui lòng thử lại!";
-             if (err instanceof AxiosError) {
-                const responseData = err.response?.data;
-                console.error("Axios error response data (AddUser):", responseData); // Log response data from Axios error
-                if (responseData) {
-                    if (typeof responseData === "string") {
-                        errorMessage = responseData;
-                    } else if (typeof responseData === "object" && (responseData as any).message) {
-                        errorMessage = (responseData as any).message;
-                    } else if ((responseData as any).errors) { // Handle backend validation errors
-                        // Assuming backend returns errors in a specific format
-                        errorMessage = Object.values((responseData as any).errors).join(", ");
-                    } else {
-                         // Fallback message if no specific message/errors from backend
-                         errorMessage = `Lỗi từ server: ${err.response?.status}`;
-                    }
-                } else {
-                     // Message for network errors or no response body
-                     errorMessage = `Lỗi mạng hoặc server không phản hồi: ${err.message}`;
-                }
-            } else if (err instanceof Error) {
-                 // Handle other types of JavaScript errors
-                 errorMessage = `Lỗi JavaScript: ${err.message}`;
-            }
+        }
+    };
 
-            setError(errorMessage); // Set the error message to display on UI
-             console.log("Error message set:", errorMessage);
+    const AddFriend = async (user: User) => {
+        setAddFriendButtonStates(prevState => ({
+            ...prevState,
+            [user.id]: { text: 'Đang gửi...', disabled: true },
+        }));
+
+        const addFriendForm = new FormData();
+        if(selectedUserForFriendship != null) {
+            addFriendForm.append('requesterId', (selectedUserForFriendship?.id).toString());
+        }
+        if(user != null) {
+            addFriendForm.append('receiverId', (user.id).toString());
+        }
+        addFriendForm.append('status', "accepted");
+        try {
+            const response = await axios.post("http://localhost:8080/api/friendships/addFriend", addFriendForm);
+            
+            setAddFriendButtonStates(prevState => ({
+                ...prevState,
+                [user.id]: { text: 'Đã thêm', disabled: true },
+            }));
+        } catch(error) {
+            console.log(error);
+            setAddFriendButtonStates(prevState => ({
+                ...prevState,
+                [user.id]: { text: 'Thêm', disabled: false }, // Or 'Thêm' to allow retrying
+            }));
+        }
+    };
+
+    const DeleteFriend = async (friendshipId:number) => {
+        if (window.confirm("Bạn có chắc chắn muốn hủy kết bạn không?")) {
+            if(friendshipId==null || !selectedUserForFriendship) {
+                console.log("Chưa chọn người dùng để hủy kết bạn hoặc chưa chọn người dùng để xem bạn bè");
+                return;
+            }
+            try {
+                const response = await axios.delete(`http://localhost:8080/api/friendships/deleteFriend/${friendshipId}`);
+                getUserFriends(selectedUserForFriendship.id);
+            } catch(error) {
+                console.log(error);
+            }
+        }
+    };
+
+    const getUserFriends = async (userId: number) => {
+        if(!userId) {
+            console.error("Không có ID người dùng để lấy danh sách bạn bè");
+            return;
+        }
+        try {
+            const response = await axios.get<Friendship[]>(`http://localhost:8080/api/friendships/userFriends/${userId}`);
+            const data = Array.isArray(response.data)
+                ? response.data.map((friendship) => ({
+                      ...friendship,
+                      requester: friendship.requester || null, 
+                      receiver: friendship.receiver || null,
+                  }))
+                : [];
+            setFriends(data);
+        } catch(error) {
+            console.log(error);
         }
     };
 
@@ -447,6 +516,7 @@ const UserManagement: React.FC = () => {
         }
     };
 
+    // Tìm kiếm dành cho quản lí người dùng(ở tổng thể)
     const filteredUsers = Array.isArray(users)
         ? users.filter((user) => {
             const matchesSearch =
@@ -461,6 +531,8 @@ const UserManagement: React.FC = () => {
     const indexOfLastUser = currentPage * usersPerPage;
     const indexOfFirstUser = indexOfLastUser - usersPerPage;
     const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
+
 
     useEffect(() => {
         // Adjust current page if filtered users change (e.g., after search/filter)
@@ -495,6 +567,26 @@ const UserManagement: React.FC = () => {
         setValidateError({});
     };
 
+    const openUserFriendsForm = (user:User) => {
+        setShowUserFriends(true);
+        setSelectedUserForFriendship(user);
+        getUserFriends(user.id);
+    };
+
+    const closeUserFriendshipForm = () => {
+        setShowUserFriends(false);
+        setSelectedUserForFriendship(null);
+    };
+
+    const openAddFriendsForm = () => {
+        setShowUserAddFriends(true);
+    };
+
+    const closeAddFriendsForm = (user:User) => {
+        setShowUserAddFriends(false);
+        getUserFriends(user.id);
+    };
+
     // Function to populate the edit form with selected user's data and show the modal
     const selectedEditUser = (user: User) => {
         // Do NOT call toggleEditUserForm() here first, as it calls emptyUser()
@@ -504,7 +596,7 @@ const UserManagement: React.FC = () => {
         setEmail(user.email);
         setBio(user.bio || ''); // Set bio, default to empty string if null
         // Do NOT pre-fill password for security reasons. Set it to empty string.
-        setPassword("");
+        setPassword(user.password || "");
         // Avatar file input will be empty initially for edit.
         // We don't set selectedAvatarFile here as the user needs to choose a *new* file to change it.
         setSelectedAvatarFile(null);
@@ -532,29 +624,33 @@ const UserManagement: React.FC = () => {
         setError(""); // Clear general error
     };
 
-    const deleteUser = async (id: number) => {
+    const deleteUser = async (user:User) => {
         if (window.confirm("Bạn có chắc chắn muốn xóa người dùng này không?")) {
-            try {
-                await axios.delete(`http://localhost:8080/api/users/deleteUser/${id}`);
-                console.log("User deleted:", id);
-                // Re-fetch users to update the table
-                getAllUsers();
-            } catch (err) {
-                console.error("DeleteUser error:", err);
-                 let errorMessage = "Xóa không thành công. Vui lòng thử lại!";
-                 if (err instanceof AxiosError) {
-                    const responseData = err.response?.data;
-                    if (responseData) {
-                        if (typeof responseData === "string") {
-                            errorMessage = responseData;
-                        } else if (typeof responseData === "object" && (responseData as any).message) {
-                            errorMessage = (responseData as any).message;
-                        } else if ((responseData as any).errors) {
-                            errorMessage = Object.values((responseData as any).errors).join(", ");
+            if(user.status === "Locked" && !friends) {
+                try {
+                    await axios.delete(`http://localhost:8080/api/users/deleteUser/${id}`);
+                    console.log("User deleted:", id);
+                    // Re-fetch users to update the table
+                    getAllUsers();
+                } catch (err) {
+                    console.error("DeleteUser error:", err);
+                    let errorMessage = "Xóa không thành công. Vui lòng thử lại!";
+                    if (err instanceof AxiosError) {
+                        const responseData = err.response?.data;
+                        if (responseData) {
+                            if (typeof responseData === "string") {
+                                errorMessage = responseData;
+                            } else if (typeof responseData === "object" && (responseData as any).message) {
+                                errorMessage = (responseData as any).message;
+                            } else if ((responseData as any).errors) {
+                                errorMessage = Object.values((responseData as any).errors).join(", ");
+                            }
                         }
                     }
+                    setError(errorMessage);
                 }
-                setError(errorMessage);
+            } else {
+                alert("Không thể xóa người dùng còn danh sách bạn bè và không bị khóa")
             }
         }
     };
@@ -603,7 +699,6 @@ const UserManagement: React.FC = () => {
         // Return true if no form errors AND no avatar file error
         return !formHasErrors && !avatarFileErrorExists;
     };
-
 
     const goToPage = (page: number) => {
         setCurrentPage(page);
@@ -741,15 +836,17 @@ const UserManagement: React.FC = () => {
                                         {/* Delete Button */}
                                         <button
                                             style={styles.deleteButton}
-                                            onClick={() => deleteUser(user.id)} // Delete user
+                                            onClick={() => deleteUser(user)} // Delete user
                                         >
                                             Xóa
                                         </button>
-                                        {/* Lock Button (conditionally rendered) */}
-                                        {user.status !== "Locked" && (
-                                            // Add lock functionality here if needed
-                                            <button style={styles.lockButton}>Khóa</button>
-                                        )}
+                                        {/* View Details Button */}
+                                        <button
+                                            style={{ ...styles.actionButton, backgroundColor: "#17a2b8" }} // Info color
+                                            onClick={() => openUserFriendsForm(user)} // Open detail modal
+                                        >
+                                            Bạn bè
+                                        </button>
                                     </td>
                                 </tr>
                             ))
@@ -1017,6 +1114,111 @@ const UserManagement: React.FC = () => {
                 </div>
             )}
 
+            {showUserFriends && selectedUserForFriendship && (
+                <div style={styles.formOverlay}> {/* Reusing formOverlay style for modal background */}
+                    <div style={styles.formContainer}> {/* Reusing formContainer style for modal content box */}
+                        {/* Close Button */}
+                        <button
+                            style={styles.closeButton}
+                            onClick={closeUserFriendshipForm}
+                            aria-label="Đóng danh sách bạn bè"
+                        >
+                            X
+                        </button>
+                        <div style={styles.formContent}>
+                            <h2 style={styles.title}>Danh sách bạn bè</h2>
+                            {friends.length === 0 ? (
+                                <p>Chưa có bạn bè nào để hiển thị.</p>
+                            ) : (
+                                // Duyệt qua mảng bạn bè và hiển thị từng người
+                                <ul style={styles.list}>
+                                {friends.map(friend => { 
+                                    const friendUser = friend.requester.id === selectedUserForFriendship.id // selectedUserForFriendship đã được kiểm tra không null ở trên
+                                    ? friend.receiver // Nếu requester là người được chọn, thì receiver là người bạn
+                                    : friend.requester; // Nếu receiver là người được chọn, thì requester là người bạn
+                                    return (
+                                        <li
+                                            key={friend.id} // Key giúp React tối ưu render
+                                            // Thêm style hover nếu cần, có thể xử lý bằng state hoặc CSS Modules
+                                            style={{ ...styles.listItem, ...(isHovered ? styles.listItemHover : {}) }}
+                                            onMouseEnter={() => setIsHovered(true)}
+                                            onMouseLeave={() => setIsHovered(false)}
+                                            >
+                                            <img
+                                                src={friendUser?.avatarUrl ?? 'frontend\public\images\placeholderAvatar.jpg'}
+                                                alt={`${friendUser?.name}'s avatar`}
+                                                style={styles.avatar}
+                                            />
+                                            <span style={styles.name}>{friendUser?.name}</span>
+                                            <button style={{ ...styles.formButton, backgroundColor: '#ffc107' }} onClick={() => DeleteFriend(friend.id)}>
+                                                Hủy bạn bè
+                                            </button>
+                                        </li>
+                                    )})}
+                                </ul>
+                            )}
+                            <button style={{ ...styles.formButton, backgroundColor: '#ffc107' }} onClick={openAddFriendsForm}>
+                                Thêm bạn bè
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showUserAddFriends && selectedUserForFriendship && (
+                <div style={styles.formOverlay}>
+                    <div style={styles.formContainer}>
+                        <button
+                            style={styles.closeButton}
+                            onClick={() => closeAddFriendsForm(selectedUserForFriendship)}
+                            aria-label="Đóng form thêm bạn bè"
+                        >
+                            X
+                        </button>
+                        <div style={styles.formContent}>
+                            <h2 style={styles.title}>Gợi ý kết bạn</h2>
+                    
+                            {listAddFriend.length === 0 ? (
+                            <p style={{ textAlign: 'center', color: '#777' }}>Không có gợi ý nào.</p>
+                            ) : (
+                            <ul style={styles.list}>
+                                {listAddFriend.map((user) => { 
+                                    const buttonState = addFriendButtonStates[user.id] || {
+                                        text: 'Thêm',
+                                        disabled: false,
+                                    };
+                                    return (
+                                    
+                                        <li
+                                            key={user.id}
+                                            style={styles.listItem} // Using only the base listItem style
+                                        >
+                                            {/* User name */}
+                                            <span style={styles.name}>{user.name}</span>
+                                
+                                            {/* Add button (Render conditionally if you hide it after success) */}
+                                            {/* buttonText !== null && ( // Uncomment this if you hide the button */}
+                                                <button
+                                                    style={{
+                                                        ...styles.addButton,
+                                                        // Apply disabled style based on local state
+                                                        ...(buttonState.disabled ? styles.addButtonDisabled : {}),
+                                                    }}
+                                                    onClick={() => AddFriend(user)} // Use the local button handler
+                                                    disabled={buttonState.disabled} // Disabled based on local state
+                                                >
+                                                    {buttonState.text} {/* Display text based on local state */}
+                                                </button>
+                                            {/* ) */} {/* Close conditional rendering if you hide the button */}
+                                        </li>
+                                )})}
+                            </ul>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Thẻ canvas ẩn để xử lý ảnh */}
             {/* ĐẶT THẺ CANVAS Ở ĐÂY, BÊN NGOÀI CÁC KHỐI RENDER CÓ ĐIỀU KIỆN */}
             <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
@@ -1247,49 +1449,82 @@ const styles: { [key: string]: React.CSSProperties } = {
         fontSize: "14px",
         marginTop: "-10px",
     },
-     formLabel: {
-        fontWeight: 'bold',
-        marginBottom: '5px',
-        display: 'block',
+    formLabel: {
+    fontWeight: 'bold',
+    marginBottom: '5px',
+    display: 'block',
+    color: '#555',
+    },
+    formInput: {
+    padding: '10px',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    fontSize: '16px',
+    width: '100%',
+    boxSizing: 'border-box',
+    },
+    formSelect: {
+    padding: '10px',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    fontSize: '16px',
+    width: '100%',
+    boxSizing: 'border-box',
+    backgroundColor: '#fff',
+    cursor: 'pointer',
+    },
+    formButton: {
+    padding: '10px 20px',
+    backgroundColor: '#007bff',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '16px',
+    marginTop: '10px',
+        transition: 'background-color 0.3s ease',
+    },
+    avatarIcon: { // Style for the avatar image in the table
+        width: '40px',
+        height: '40px',
+        borderRadius: '50%', // Make it round
+        objectFit: 'cover', // Ensure image covers the area
+        border: '1px solid #ccc' // Optional border
+    },
+    title: {
+        textAlign: 'center',
+        color: '#333',
+        marginBottom: '15px',
+        fontSize: '24px',
+    },
+    list: {
+        listStyle: 'none', // Bỏ dấu chấm của list
+        padding: 0,
+        margin: 0,
+    },
+    listItem: {
+        display: 'flex', // Dùng flexbox để căn chỉnh ảnh và tên
+        alignItems: 'center', // Căn giữa theo chiều dọc
+        padding: '10px 0',
+        borderBottom: '1px solid #eee', // Đường gạch chân giữa các item
+        cursor: 'pointer', // Biểu tượng con trỏ khi hover
+        transition: 'background-color 0.2s ease-in-out', // Hiệu ứng hover mượt mà
+    },
+    listItemHover: { // Nếu dùng style hover bằng JS
+      backgroundColor: '#e9e9e9',
+    },
+    avatar: {
+        width: '40px',
+        height: '40px',
+        borderRadius: '50%', // Tạo ảnh tròn
+        marginRight: '15px', // Khoảng cách giữa ảnh và tên
+        objectFit: 'cover', // Đảm bảo ảnh không bị méo
+    },
+    name: {
+        fontSize: '16px',
         color: '#555',
-     },
-     formInput: {
-        padding: '10px',
-        border: '1px solid #ccc',
-        borderRadius: '4px',
-        fontSize: '16px',
-        width: '100%',
-        boxSizing: 'border-box',
-     },
-     formSelect: {
-        padding: '10px',
-        border: '1px solid #ccc',
-        borderRadius: '4px',
-        fontSize: '16px',
-        width: '100%',
-        boxSizing: 'border-box',
-        backgroundColor: '#fff',
-        cursor: 'pointer',
-     },
-     formButton: {
-        padding: '10px 20px',
-        backgroundColor: '#007bff',
-        color: 'white',
-        border: 'none',
-        borderRadius: '4px',
-        cursor: 'pointer',
-        fontSize: '16px',
-        marginTop: '10px',
-         transition: 'background-color 0.3s ease',
-     },
-     avatarIcon: { // Style for the avatar image in the table
-         width: '40px',
-         height: '40px',
-         borderRadius: '50%', // Make it round
-         objectFit: 'cover', // Ensure image covers the area
-         border: '1px solid #ccc' // Optional border
-     }
+        fontWeight: 'bold',
+    },
 };
-
 
 export default UserManagement;

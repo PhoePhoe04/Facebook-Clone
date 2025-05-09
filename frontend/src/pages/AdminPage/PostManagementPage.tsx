@@ -121,27 +121,20 @@ const PostManagementPage: React.FC = () => {
   const MAX_AVATAR_HEIGHT = 200; // Ví dụ: chiều cao tối đa 200px
   const JPEG_QUALITY = 0.8; // Chất lượng nén cho JPEG (0.0 đến 1.0)
   // Hàm xử lý khi người dùng chọn file, bao gồm logic thu nhỏ ảnh
-  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files ? e.target.files[0] : null; // Lấy file đầu tiên
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null; // Lấy file đầu tiên
 
-      // Reset state trước khi xử lý file mới hoặc nếu không có file
-      setSelectedImageFile(null);
-      // Clear validation error specifically for avatarFile
+    // Reset state trước khi xử lý file mới hoặc nếu không có file
+    setSelectedImageFile(null);
+    // Clear validation error specifically for avatarFile
 
-      if (!file) {
-          console.log("No file selected.");
-          return; // Dừng lại nếu không có file
-      }
+    if (!file) {
+        console.log("No file selected.");
+        return; // Dừng lại nếu không có file
+    }
 
-      // Kiểm tra loại file cơ bản
-      if (!file.type.startsWith('image/')) {
-          setValidateError(prev => ({ ...prev, avatarFile: "File phải là định dạng ảnh." }));
-          console.error("Selected file is not an image.");
-          // Reset input file để người dùng có thể chọn lại
-          if (e.target) e.target.value = '';
-          return;
-      }
-
+    // Kiểm tra loại file cơ bản
+    if (file.type.startsWith('image/')) {
       // Kiểm tra kích thước file (ví dụ: max 10MB trước khi resize)
       const MAX_FILE_SIZE_BEFORE_RESIZE = 10 * 1024 * 1024; // 10MB
       if (file.size > MAX_FILE_SIZE_BEFORE_RESIZE) {
@@ -166,112 +159,109 @@ const PostManagementPage: React.FC = () => {
       });
 
       try {
-          const dataUrl = await fileReadPromise; // Đợi FileReader đọc xong, lấy Data URL
+        const dataUrl = await fileReadPromise; // Đợi FileReader đọc xong, lấy Data URL
 
-          // Tạo đối tượng Image để tải ảnh vào bộ nhớ
-          const img = new Image();
+        // Tạo đối tượng Image để tải ảnh vào bộ nhớ
+        const img = new Image();
 
-          // Sử dụng Promise để đợi Image tải xong
-          const imageLoadPromise = new Promise<void>((resolve, reject) => {
-              img.onload = () => resolve();
-              img.onerror = (error) => reject(error);
-              img.src = dataUrl; // Gán Data URL để Image tải ảnh
-          });
+        // Sử dụng Promise để đợi Image tải xong
+        const imageLoadPromise = new Promise<void>((resolve, reject) => {
+            img.onload = () => resolve();
+            img.onerror = (error) => reject(error);
+            img.src = dataUrl; // Gán Data URL để Image tải ảnh
+        });
 
-          await imageLoadPromise; // Đợi Image tải xong
+        await imageLoadPromise; // Đợi Image tải xong
 
-          // Lấy thẻ canvas từ ref
-          const canvas = canvasRef.current;
-          // Kiểm tra canvas element
-          if (!canvas) {
-                console.error("Canvas element not found. Ensure <canvas ref={canvasRef}> is in the DOM.");
-                setError("Lỗi nội bộ: Không tìm thấy canvas xử lý ảnh.");
-                // Reset input file
-                if (e.target) e.target.value = '';
-                return;
+        // Lấy thẻ canvas từ ref
+        const canvas = canvasRef.current;
+        // Kiểm tra canvas element
+        if (!canvas) {
+              console.error("Canvas element not found. Ensure <canvas ref={canvasRef}> is in the DOM.");
+              setError("Lỗi nội bộ: Không tìm thấy canvas xử lý ảnh.");
+              // Reset input file
+              if (e.target) e.target.value = '';
+              return;
+        }
+        const ctx = canvas.getContext('2d');
+          if (!ctx) {
+              console.error("Canvas context not found.");
+              setError("Lỗi nội bộ: Không lấy được context canvas.");
+              // Reset input file
+              if (e.target) e.target.value = '';
+              return;
+        }
+
+
+        // Tính toán kích thước mới để giữ tỷ lệ khung hình
+        let width = img.width;
+        let height = img.height;
+
+        // Chỉ thu nhỏ nếu ảnh lớn hơn kích thước tối đa
+        if (width > MAX_AVATAR_WIDTH || height > MAX_AVATAR_HEIGHT) {
+            if (width > height) {
+                // Ảnh ngang
+                height = Math.round(height * (MAX_AVATAR_WIDTH / width));
+                width = MAX_AVATAR_WIDTH;
+            } else {
+                // Ảnh dọc hoặc vuông
+                width = Math.round(width * (MAX_AVATAR_HEIGHT / height));
+                height = MAX_AVATAR_HEIGHT;
+            }
+        }
+        // Nếu ảnh nhỏ hơn kích thước tối đa, giữ nguyên kích thước
+        else {
+            width = img.width;
+            height = img.height;
+        }
+
+
+        // Đặt kích thước cho canvas
+        canvas.width = width;
+        canvas.height = height;
+
+        // Xóa nội dung canvas cũ (nếu có)
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Vẽ ảnh gốc lên canvas với kích thước mới (thu nhỏ/phóng to nếu cần)
+        ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, width, height);
+
+        // Xuất ảnh từ canvas dưới dạng Blob (định dạng file gốc nếu hỗ trợ, hoặc JPEG)
+        // Sử dụng Promise để đợi toBlob xử lý xong
+        const blobPromise = new Promise<Blob | null>((resolve) => {
+            // Kiểm tra xem file gốc có phải là JPEG không để áp dụng chất lượng nén
+            const outputMimeType = file.type === 'image/jpeg' ? 'image/jpeg' : 'image/png'; // Giữ nguyên định dạng gốc hoặc dùng png
+            const quality = outputMimeType === 'image/jpeg' ? JPEG_QUALITY : undefined; // Áp dụng chất lượng chỉ cho JPEG
+
+            canvas.toBlob((blob) => {
+                resolve(blob);
+            }, outputMimeType, quality);
+        });
+
+        const resizedBlob = await blobPromise; // Đợi Blob được tạo
+
+        if (resizedBlob) {
+          // Tạo một đối tượng File từ Blob để có tên file (tùy chọn nhưng hữu ích)
+          // Blob không có tên file, File kế thừa từ Blob và có tên
+          const resizedFile = new File([resizedBlob], file.name, { type: resizedBlob.type, lastModified: Date.now() });
+
+          setSelectedImageFile(resizedFile); // Lưu File đã resize vào state
+          console.log("Resized file created:", resizedFile.name, resizedFile.type, (resizedFile.size / 1024).toFixed(2) + " KB");
+
+          // Có thể thêm validation kích thước file sau khi resize ở đây nếu cần
+          const MAX_FILE_SIZE_AFTER_RESIZE = 5 * 1024 * 1024; // Ví dụ: max 5MB sau resize
+          if (resizedFile.size > MAX_FILE_SIZE_AFTER_RESIZE) {
+              setValidateError(prev => ({ ...prev, avatarFile: `Kích thước ảnh sau khi xử lý quá lớn (${(resizedFile.size / 1024 / 1024).toFixed(2)}MB).` }));
+              console.error("File size too large after resize.");
+              // Có thể reset selectedImageFile(null) ở đây nếu không cho phép upload ảnh lớn sau resize
           }
-          const ctx = canvas.getContext('2d');
-            if (!ctx) {
-                console.error("Canvas context not found.");
-                setError("Lỗi nội bộ: Không lấy được context canvas.");
-                // Reset input file
-                if (e.target) e.target.value = '';
-                return;
-          }
-
-
-          // Tính toán kích thước mới để giữ tỷ lệ khung hình
-          let width = img.width;
-          let height = img.height;
-
-          // Chỉ thu nhỏ nếu ảnh lớn hơn kích thước tối đa
-          if (width > MAX_AVATAR_WIDTH || height > MAX_AVATAR_HEIGHT) {
-              if (width > height) {
-                  // Ảnh ngang
-                  height = Math.round(height * (MAX_AVATAR_WIDTH / width));
-                  width = MAX_AVATAR_WIDTH;
-              } else {
-                  // Ảnh dọc hoặc vuông
-                  width = Math.round(width * (MAX_AVATAR_HEIGHT / height));
-                  height = MAX_AVATAR_HEIGHT;
-              }
-          }
-          // Nếu ảnh nhỏ hơn kích thước tối đa, giữ nguyên kích thước
-          // else {
-          //     // width = img.width;
-          //     // height = img.height;
-          // }
-
-
-          // Đặt kích thước cho canvas
-          canvas.width = width;
-          canvas.height = height;
-
-          // Xóa nội dung canvas cũ (nếu có)
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-          // Vẽ ảnh gốc lên canvas với kích thước mới (thu nhỏ/phóng to nếu cần)
-          ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, width, height);
-
-          // Xuất ảnh từ canvas dưới dạng Blob (định dạng file gốc nếu hỗ trợ, hoặc JPEG)
-          // Sử dụng Promise để đợi toBlob xử lý xong
-          const blobPromise = new Promise<Blob | null>((resolve) => {
-              // Kiểm tra xem file gốc có phải là JPEG không để áp dụng chất lượng nén
-              const outputMimeType = file.type === 'image/jpeg' ? 'image/jpeg' : 'image/png'; // Giữ nguyên định dạng gốc hoặc dùng png
-              const quality = outputMimeType === 'image/jpeg' ? JPEG_QUALITY : undefined; // Áp dụng chất lượng chỉ cho JPEG
-
-              canvas.toBlob((blob) => {
-                  resolve(blob);
-              }, outputMimeType, quality);
-          });
-
-          const resizedBlob = await blobPromise; // Đợi Blob được tạo
-
-          if (resizedBlob) {
-              // Tạo một đối tượng File từ Blob để có tên file (tùy chọn nhưng hữu ích)
-              // Blob không có tên file, File kế thừa từ Blob và có tên
-              const resizedFile = new File([resizedBlob], file.name, { type: resizedBlob.type, lastModified: Date.now() });
-
-              setSelectedImageFile(resizedFile); // Lưu File đã resize vào state
-              console.log("Resized file created:", resizedFile.name, resizedFile.type, (resizedFile.size / 1024).toFixed(2) + " KB");
-
-              // Bạn có thể thêm validation kích thước file sau khi resize ở đây nếu cần
-                const MAX_FILE_SIZE_AFTER_RESIZE = 5 * 1024 * 1024; // Ví dụ: max 5MB sau resize
-                if (resizedFile.size > MAX_FILE_SIZE_AFTER_RESIZE) {
-                    setValidateError(prev => ({ ...prev, avatarFile: `Kích thước ảnh sau khi xử lý quá lớn (${(resizedFile.size / 1024 / 1024).toFixed(2)}MB).` }));
-                    console.error("File size too large after resize.");
-                    // Có thể reset selectedImageFile(null) ở đây nếu không cho phép upload ảnh lớn sau resize
-                }
-
-
-          } else {
-              console.error("Failed to create resized image Blob.");
-              setError("Lỗi xử lý ảnh: Không thể tạo file ảnh đã thu nhỏ.");
-              setSelectedImageFile(null); // Đảm bảo state là null nếu xử lý thất bại
-                // Reset input file
-                if (e.target) e.target.value = '';
-          }
-
+        } else {
+            console.error("Failed to create resized image Blob.");
+            setError("Lỗi xử lý ảnh: Không thể tạo file ảnh đã thu nhỏ.");
+            setSelectedImageFile(null); // Đảm bảo state là null nếu xử lý thất bại
+              // Reset input file
+              if (e.target) e.target.value = '';
+        }
       } catch (error) {
           console.error("Error during image processing:", error);
           setError("Có lỗi xảy ra khi xử lý ảnh.");
@@ -279,52 +269,29 @@ const PostManagementPage: React.FC = () => {
             // Reset input file
             if (e.target) e.target.value = '';
       }
+    } else if(file.type.startsWith('video/')) {
+      // --- Kiểm tra kích thước file (Tùy chọn) ---
+      // Ví dụ: Giới hạn kích thước video tối đa là 500MB
+      const MAX_VIDEO_SIZE_BYTES = 500 * 1024 * 1024; // 500 MB
+      if (file.size > MAX_VIDEO_SIZE_BYTES) {
+          // Nếu file quá lớn, set lỗi validate
+          setValidateError(prev => ({ ...prev, mediaFile: `Kích thước file video quá lớn (${(file.size / 1024 / 1024).toFixed(2)}MB). Vui lòng chọn file nhỏ hơn ${MAX_VIDEO_SIZE_BYTES / (1024 * 1024)}MB.` }));
+          console.error("Video file size too large:", file.size);
+          // Xóa file đã chọn trong input
+          if (e.target) e.target.value = '';
+          return;
+      }
+
+      // --- Lưu đối tượng File video đã chọn vào state ---
+      // selectedVideoFile state sẽ giữ đối tượng File này, sẵn sàng để gửi lên backend sau
+      setSelectedVideoFile(file);
+      setPostVideoUrl(URL.createObjectURL(file));
+      if(selectedVideoFile==null){
+        console.log("hello no video sad");
+      }
+    }
   };
 
-  const handleVideo = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files ? e.target.files[0] : null; // Lấy file đầu tiên được chọn
-
-    // Reset state file đã chọn và lỗi validate avatar/media
-    setSelectedVideoFile(null); // Reset file video đã chọn
-    // Nếu bạn dùng chung validateError cho cả ảnh và video, hãy reset key tương ứng
-    setError(""); // Xóa lỗi chung
-
-    if (!file) {
-        console.log("No file selected in handleImage.");
-        return; // Dừng lại nếu không có file nào được chọn
-    }
-
-    // --- Kiểm tra loại file có phải là video không ---
-    if (!file.type.startsWith('video/')) {
-        // Nếu không phải video, set lỗi validate
-        setValidateError(prev => ({ ...prev, mediaFile: "Vui lòng chọn một file video." }));
-        console.error("Selected file is not a video:", file.type);
-        // Tùy chọn: Xóa file đã chọn trong input để người dùng có thể chọn lại
-        if (e.target) e.target.value = '';
-        return;
-    }
-
-    // --- Kiểm tra kích thước file (Tùy chọn) ---
-    // Ví dụ: Giới hạn kích thước video tối đa là 500MB
-    const MAX_VIDEO_SIZE_BYTES = 500 * 1024 * 1024; // 500 MB
-    if (file.size > MAX_VIDEO_SIZE_BYTES) {
-        // Nếu file quá lớn, set lỗi validate
-        setValidateError(prev => ({ ...prev, mediaFile: `Kích thước file video quá lớn (${(file.size / 1024 / 1024).toFixed(2)}MB). Vui lòng chọn file nhỏ hơn ${MAX_VIDEO_SIZE_BYTES / (1024 * 1024)}MB.` }));
-        console.error("Video file size too large:", file.size);
-         // Xóa file đã chọn trong input
-        if (e.target) e.target.value = '';
-        return;
-    }
-
-    // --- Lưu đối tượng File video đã chọn vào state ---
-    // selectedVideoFile state sẽ giữ đối tượng File này, sẵn sàng để gửi lên backend sau
-    setSelectedVideoFile(file);
-
-    setPostVideoUrl(URL.createObjectURL(file));
-    console.log(postVideoUrl);
-
-    console.log("Video file selected and validated:", file.name, file.type, (file.size / 1024 / 1024).toFixed(2) + " MB");
-  };
 
   const getStatusStyle = (status: string): React.CSSProperties => {
     if (status === "Đã xuất bản")
@@ -855,18 +822,11 @@ const PostManagementPage: React.FC = () => {
               placeholder="Nội dung bài viết"
               style={{ width: "100%", minHeight: "100px", marginBottom: "10px" }}
             />
-            <label>Đăng ảnh:</label>
+            <label>Đăng ảnh/video:</label>
             <input
               type="file"
-              accept="image/*"
-              onChange={handleImage}
-              style={{ width: "100%", marginBottom: "10px" }}
-            />
-            <label>Đăng video:</label>
-            <input
-              type="file"
-              accept="video/*"
-              onChange={handleVideo}
+              accept="image/*, video/*"
+              onChange={handleFile}
               style={{ width: "100%", marginBottom: "10px" }}
             />
             <button style={styles.functionPostButton} onClick={AddPost} disabled={isLoading}>
@@ -892,18 +852,11 @@ const PostManagementPage: React.FC = () => {
               placeholder="Nội dung bài viết"
               style={{ width: "100%", minHeight: "100px", marginBottom: "10px" }}
             />
-            <label>Đăng ảnh:</label>
+            <label>Đăng ảnh/video:</label>
             <input
               type="file"
-              accept="image/*"
-              onChange={handleImage}
-              style={{ width: "100%", marginBottom: "10px" }}
-            />
-            <label>Đăng video:</label>
-            <input
-              type="file"
-              accept="video/*"
-              onChange={handleVideo}
+              accept="image/*, video/*"
+              onChange={handleFile}
               style={{ width: "100%", marginBottom: "10px" }}
             />
             <label>Trạng thái:</label>
