@@ -1,38 +1,57 @@
-import React from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 
 const HomeDashBoard: React.FC = () => {
+  const [userCount, setUserCount] = useState<number>();
+  const [postCount, setPostCount] = useState<number>();
+
+  const getCountPost = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/api/posts/countPost");
+      setPostCount(response.data);
+    } catch(error) {
+      console.log(error);
+    }
+  };
+
+  const getCountUser = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/api/users/countUser");
+      setUserCount(response.data);
+    } catch(error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    // Gọi cả hai hàm bất đồng bộ
+    const fetchCounts = async () => {
+      await Promise.all([getCountPost(), getCountUser()]);
+    };
+
+    fetchCounts();
+  }, []);
+
   return (
     <div style={styles.homeContainer}>
       {/* Thống kê tổng quan */}
       <div style={styles.statisticsSection}>
         <div style={styles.statCard}>
           <h3 style={styles.statTitle}>Người dùng</h3>
-          <p style={styles.statValue}>23,586</p>
+          <p style={styles.statValue}>{userCount}</p>
         </div>
         <div style={styles.statCard}>
           <h3 style={styles.statTitle}>Bài đăng</h3>
-          <p style={styles.statValue}>12,450</p>
-        </div>
-        <div style={styles.statCard}>
-          <h3 style={styles.statTitle}>Videos</h3>
-          <p style={styles.statValue}>5,789</p>
-        </div>
-        <div style={styles.statCard}>
-          <h3 style={styles.statTitle}>Doanh thu</h3>
-          <p style={styles.statValue}>$15,890</p>
-        </div>
-        <div style={styles.statCard}>
-          <h3 style={styles.statTitle}>Người dùng hoạt động hàng ngày</h3>
-          <p style={styles.statValue}>17,890</p>
+          <p style={styles.statValue}>{postCount}</p>
         </div>
       </div>
 
-      {/* Placeholder Biểu đồ */}
       <div style={styles.chartSection}>
-        <h3 style={styles.sectionTitle}>Biểu đồ Tổng Quan</h3>
-        <div style={styles.chartPlaceholder}>
-          <p>Biểu đồ (Placeholder)</p>
-        </div>
+        <h3 style={styles.sectionTitle}>Ảnh Tổng Quan</h3>
+        <img
+          src="/images/homeImage.jpg" 
+          style={styles.homeImage}
+        />
       </div>
     </div>
   );
@@ -89,6 +108,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: "center",
     color: "#7f8c8d",
     fontStyle: "italic",
+  },
+  homeImage: {
+    width: "100%", // Responsive: ảnh chiếm toàn bộ chiều rộng container
+    maxHeight: "300px", // Giới hạn chiều cao để tránh ảnh quá lớn
+    objectFit: "cover", // Đảm bảo ảnh không bị méo
+    borderRadius: "8px", // Bo góc cho đẹp (tùy chọn)
   },
 };
 
