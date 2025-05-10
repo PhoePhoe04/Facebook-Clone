@@ -1,7 +1,34 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const handleLogin = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/users/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded", // đúng kiểu cho @RequestParam
+        },
+        body: new URLSearchParams({
+          email,
+          password,
+        }),
+      });
+
+      if (response.ok) {
+        const user = await response.json();
+        console.log("Login success:", user);
+        navigate("/"); 
+      } else {
+        alert("Email hoặc mật khẩu không đúng");
+      }
+    } catch (error) {
+      console.error("Lỗi đăng nhập:", error);
+    }
+  };
+
   const navigate = useNavigate();
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
@@ -19,15 +46,17 @@ const LoginPage = () => {
         <div className="w-full max-w-lg bg-white p-6 rounded-lg shadow-lg">
           <input
             type="text"
-            placeholder="Email hoặc số điện thoại"
+            placeholder="Email"
             className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => setEmail(e.target.value)}
           />
           <input
             type="password"
             placeholder="Mật khẩu"
             className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => setPassword(e.target.value)}
           />
-          <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700">
+          <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700" onClick={handleLogin}>
             Đăng nhập
           </button>
           <div className="text-center mt-4">

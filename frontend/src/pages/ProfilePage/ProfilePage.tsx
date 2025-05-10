@@ -1,70 +1,43 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProfileTabs from './ProfileTabs';
 import ProfilePost from './ProfilePost';
 import ProfileFriend from "./ProfileFriend";
 import ProfilePhoto from "./ProfilePhoto";
 import PostModal from "./PostModal";
-// Giả lập dữ liệu người dùng
-const user = {
-  name: 'Tên người dùng',
-  postsCount: 464,
-  avatar: '/images/dp5.png',
-  coverImage: '/images/GYuWtZPXkAAA6WT.jpg',
-};  
 
-const images = [
-  "/images/dp1.png",
-  "/images/dp2.png",
-  "/images/dp3.png",
-  "/images/dp1.png",
-  "/images/dp2.png",
-  "/images/dp3.png",
-  "/images/dp4.png",
-  "/images/dp1.png",
-  "/images/dp2.png",
-  "/images/dp3.png",
-];
-
-const friends = [
-  { name: "Friend 1", img: "/images/dp1.png" },
-  { name: "Friend 2", img: "/images/dp2.png" },
-  { name: "Friend 3", img: "/images/dp3.png" },
-  { name: "Friend 4", img: "/images/dp4.png" },
-  { name: "Friend 5", img: "/images/dp1.png" },
-  { name: "Friend 6", img: "/images/dp2.png" },
-  { name: "Friend 7", img: "/images/dp3.png" },
-  { name: "Friend 8", img: "/images/dp4.png" },
-  { name: "Friend 9", img: "/images/dp1.png" },
-  { name: "Friend 10", img: "/images/dp2.png" },
-];
+const images = Array(10).fill(null).map((_, i) => `/images/dp${(i % 4) + 1}.png`);
+const friends = Array(10).fill(null).map((_, i) => ({
+  name: `Friend ${i + 1}`,
+  img: `/images/dp${(i % 4) + 1}.png`
+}));
 
 const ProfilePage = () => {
-  const [avatarPreview, setAvatarPreview] = useState(user.avatar);
-  const [coverPreview, setCoverPreview] = useState(user.coverImage);
+  const [user, setUser] = useState({
+    name: '',
+    postsCount: 0,
+    avatar: '',
+    coverImage: ''
+  });
+  
+  const [avatarPreview, setAvatarPreview] = useState("");
+  const [coverPreview, setCoverPreview] = useState("");
+  const [coverImage, setCoverImage] = useState("");
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [activeMain, setActiveMain] = useState("Bài viết");
-  const [coverImage, setCoverImage] = useState('/images/GYuWtZPXkAAA6WT.jpg');
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-  // const handleCoverImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files?.[0];
-  //   if (file) {
-  //     const formData = new FormData();
-  //     formData.append("file", file);
-  
-  //     try {
-  //       const response = await fetch("/api/upload", {
-  //         method: "POST",
-  //         body: formData,
-  //       });
-  //       const data = await response.json();
-  //       setCoverImage(data.url); // URL ảnh từ server
-  //     } catch (error) {
-  //       console.error("Upload failed", error);
-  //     }
-  //   }
-  // };
+  useEffect(() => {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        setAvatarPreview(parsedUser.avatar);
+        setCoverPreview(parsedUser.coverImage);
+        setCoverImage(parsedUser.coverImage);
+      }
+    }, []);
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -243,7 +216,7 @@ const handlePost = (postData: any) => {
                       </div>
                       <div>
                         <label className="block text-sm font-semibold">Số điện thoại</label>
-                        <input type="text" defaultValue="0123456789" className="w-full border px-3 py-2 rounded-md" />
+                        <input type="text" className="w-full border px-3 py-2 rounded-md" />
                       </div>
                       <div>
                         <label className="block text-sm font-semibold mb-1">Ảnh đại diện hiện tại</label>
