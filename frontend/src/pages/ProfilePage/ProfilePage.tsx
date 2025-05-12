@@ -4,6 +4,7 @@ import ProfilePost from './ProfilePost';
 import ProfileFriend from "./ProfileFriend";
 import ProfilePhoto from "./ProfilePhoto";
 import PostModal from "./PostModal";
+import axios from 'axios';
 
 const images = Array(10).fill(null).map((_, i) => `/images/dp${(i % 4) + 1}.png`);
 const friends = Array(10).fill(null).map((_, i) => ({
@@ -12,32 +13,22 @@ const friends = Array(10).fill(null).map((_, i) => ({
 }));
 
 const ProfilePage = () => {
-  const [user, setUser] = useState({
-    name: '',
-    postsCount: 0,
-    avatar: '',
-    coverImage: ''
-  });
-  
+  const [user, setUser] = useState<any>(null);
   const [avatarPreview, setAvatarPreview] = useState("");
   const [coverPreview, setCoverPreview] = useState("");
   const [coverImage, setCoverImage] = useState("");
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [activeMain, setActiveMain] = useState("Bài viết");
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  useEffect(() => {
+    const storedUser = localStorage.getItem("currentUser");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-  useEffect(() => {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setAvatarPreview(parsedUser.avatar);
-        setCoverPreview(parsedUser.coverImage);
-        setCoverImage(parsedUser.coverImage);
-      }
-    }, []);
+
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -53,9 +44,12 @@ const ProfilePage = () => {
     }
   };
 
-const handlePost = (postData: any) => {
+  const handlePost = (postData: any) => {
     console.log("Bài viết mới:", postData);
   };
+  if (!user) {
+    return <div>Đang tải dữ liệu người dùng...</div>;
+  }
   
   return (
     <div className="flex flex-col py-2 min-h-screen bg-white-fff">
@@ -70,7 +64,7 @@ const handlePost = (postData: any) => {
             {/* Phần ảnh bìa và ảnh đại diện */}
             <div className="relative">
               {/* Ảnh bìa */}
-              <img src={coverPreview} alt="Cover" className="w-full h-72 object-cover" />
+              <img src={coverPreview || "/images/dp5.png"} alt="Cover" className="w-full h-72 object-cover" />
               {/* Nút chỉnh sửa ảnh bìa */}
               <button className="absolute top-4 right-4 bg-white text-black px-3 py-1 rounded-md flex items-center gap-2 shadow-md cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -88,7 +82,7 @@ const handlePost = (postData: any) => {
               />
               {/* Ảnh đại diện */}
               <div className="absolute -bottom-16 left-4">
-                <img src={avatarPreview} alt="Avatar" className="w-48 h-48 rounded-full border-4 border-gray-900 object-cover" />
+                <img src={user.avatarImage || "/images/dp5.png" } alt="Avatar" className="w-48 h-48 rounded-full border-4 border-gray-900 object-cover" />
               </div>
             </div>
             {/* Phần thông tin người dùng */}
@@ -171,7 +165,7 @@ const handlePost = (postData: any) => {
             <div className="w-3/5 p-4">
               {/* Thanh nhập trạng thái */}
               <div className="bg-white p-4 rounded-lg shadow-md flex items-center gap-2">
-                <img src={user.avatar} alt="Avatar" className="w-10 h-10 rounded-full" />
+                <img src={user.avatarImage} alt="Avatar" className="w-10 h-10 rounded-full" />
                 <input
                   type="text"
                   placeholder="Bạn đang nghĩ gì?"
@@ -215,23 +209,18 @@ const handlePost = (postData: any) => {
                         <input type="text" defaultValue={user.name} className="w-full border px-3 py-2 rounded-md" />
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold">Số điện thoại</label>
-                        <input type="text" className="w-full border px-3 py-2 rounded-md" />
-                      </div>
-                      <div>
                         <label className="block text-sm font-semibold mb-1">Ảnh đại diện hiện tại</label>
-                        <img src={user.avatar} alt="Avatar Preview" className="w-24 h-24 rounded-full object-cover mb-2" />
+                        <img src={user.avatarImage} alt="Avatar Preview" className="w-24 h-24 rounded-full object-cover mb-2" />
                         <input type="file" accept="image/*" className="w-full" onChange={handleAvatarChange} />
                       </div>
                       <div>
                         <label className="block text-sm font-semibold mb-1">Ảnh bìa hiện tại</label>
-                        <img src={coverImage} alt="Cover Preview" className="w-full h-32 object-cover mb-2 rounded" />
+                        <img src={user.avatarImage} alt="Cover Preview" className="w-full h-32 object-cover mb-2 rounded" />
                         <input type="file" accept="image/*" className="w-full" onChange={handleCoverChange} />
                       </div>
                       <button
                         type="submit"
-                        className="bg-blue-600 text-white px-4 py-2 mt-4 rounded-md hover:bg-blue-700"
-                      >
+                        className="bg-blue-600 text-white px-4 py-2 mt-4 rounded-md hover:bg-blue-700">
                         Lưu thay đổi
                       </button>
                     </form>
