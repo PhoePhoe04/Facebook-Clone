@@ -19,11 +19,12 @@ const LoginPage = () => {
 
       if (response.ok) {
         const user = await response.json();
-        console.log("Login success:", user);
-        navigate("/"); 
+        localStorage.setItem("currentUser", JSON.stringify(user));
+        navigate("/");
       } else {
         alert("Email hoặc mật khẩu không đúng");
       }
+      
     } catch (error) {
       console.error("Lỗi đăng nhập:", error);
     }
