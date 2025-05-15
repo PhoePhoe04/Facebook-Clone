@@ -1,4 +1,3 @@
-import React from "react";
 
 const photos = [
     "/images/dp1.png",
