@@ -1,6 +1,15 @@
 import { HandThumbUpIcon, ChatBubbleOvalLeftIcon, ShareIcon } from "@heroicons/react/24/outline";
 import { useState, useCallback } from "react";
-import PostModal from "./PostModal"; // nhớ đúng path
+import PostModal from "./PostModal";
+
+interface CommentType {
+  id: number;
+  name: string;
+  avatar: string;
+  text: string;
+  timestamp: string;
+  image?: string;
+}
 
 interface PostType {
   id: number;
@@ -13,6 +22,7 @@ interface PostType {
   comments: number;
   shares: number;
   isLiked: boolean;
+  commentList: CommentType[];
 }
 
 const ProfilePost = () => {
@@ -28,6 +38,7 @@ const ProfilePost = () => {
       comments: 5,
       shares: 2,
       isLiked: false,
+      commentList: [],
     },
     {
       id: 2,
@@ -40,6 +51,7 @@ const ProfilePost = () => {
       comments: 10,
       shares: 4,
       isLiked: true,
+      commentList: [],
     },
   ]);
 
@@ -62,8 +74,7 @@ const ProfilePost = () => {
     },
     []
   );
-
-  // Tối ưu hóa hàm addPost bằng useCallback
+  
   const addPost = useCallback(
     (content: string, image: string | null) => {
       const newPost: PostType = {
@@ -77,11 +88,35 @@ const ProfilePost = () => {
         comments: 0,
         shares: 0,
         isLiked: false,
+        commentList: [],
       };
-      setPosts([newPost, ...posts]);
+      setPosts((prev) => [newPost, ...prev]);
     },
-    [posts]
+    []
   );
+
+  const handleAddComment = (postId: number, text: string, image?: string | null) => {
+    const newComment: CommentType = {
+      id: Date.now(),
+      name: "Tên người dùng",
+      avatar: "/images/dp5.png",
+      text,
+      timestamp: "Vừa xong",
+      image: image || undefined,
+    };
+
+    setPosts((prev) =>
+      prev.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              comments: post.comments + 1,
+              commentList: [...post.commentList, newComment],
+            }
+          : post
+      )
+    );
+  };
 
   return (
     <div className="mt-4">
@@ -89,7 +124,7 @@ const ProfilePost = () => {
       <PostModal isOpen={showModal} onClose={() => setShowModal(false)} onPost={addPost} />
 
       {posts.map((post) => (
-        <Post key={post.id} post={post} onLike={handleLike} />
+        <Post key={post.id} post={post} onLike={handleLike} onAddComment={handleAddComment} />
       ))}
     </div>
   );
@@ -98,10 +133,27 @@ const ProfilePost = () => {
 const Post = ({
   post,
   onLike,
+  onAddComment,
 }: {
   post: PostType;
   onLike: (id: number) => void;
+  onAddComment: (postId: number, text: string, image?: string | null) => void;
 }) => {
+  const [commentText, setCommentText] = useState("");
+  const [showComments, setShowComments] = useState(false);
+  const [commentImage, setCommentImage] = useState<string | null>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCommentImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const {
     id,
     name,
@@ -139,7 +191,7 @@ const Post = ({
       <div className="px-3 pb-3 border-t border-gray-200">
         <div className="flex justify-between text-gray-500 text-sm py-2">
           <div className="flex items-center space-x-1">
-            <span className="text-blue-500">{isLiked ? "👍" : "😂"}</span>
+            <span className="text-blue-500">👍</span>
             <span>{likes.toLocaleString()}</span>
           </div>
           <div className="flex space-x-2">
@@ -157,7 +209,9 @@ const Post = ({
             <HandThumbUpIcon className="h-5 w-5" />
             <span>Like</span>
           </button>
-          <button className="flex flex-1 items-center justify-center space-x-1 px-4 py-2 rounded-md hover:bg-gray-100 text-gray-500">
+          <button
+            onClick={() => setShowComments(!showComments)}
+            className="flex flex-1 items-center justify-center space-x-1 px-4 py-2 rounded-md hover:bg-gray-100 text-gray-500">
             <ChatBubbleOvalLeftIcon className="h-5 w-5" />
             <span>Comment</span>
           </button>
@@ -167,6 +221,85 @@ const Post = ({
           </button>
         </div>
       </div>
+      {showComments && (
+        <div className="px-4 py-2">
+          {/* Input comment */}
+          <div className="flex flex-col gap-2 mb-3">
+            <div className="flex items-center relative w-full">
+              <img src="/images/dp5.png" alt="avatar" className="w-8 h-8 rounded-full mr-2" />
+
+              <input
+                type="text"
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && commentText.trim() !== "") {
+                    onAddComment(post.id, commentText.trim(), commentImage);
+                    setCommentText("");
+                    setCommentImage(null);
+                  }
+                }}
+                placeholder="Viết bình luận..."
+                className="flex-1 border border-gray-300 rounded-full px-4 py-2 pr-10 text-base focus:outline-none"
+              />
+
+              {/* Icon thêm ảnh nằm trong input */}
+              <label htmlFor={`file-input-${post.id}`} className="absolute right-3 cursor-pointer">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-5 h-5 text-gray-500 hover:text-blue-500"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3 16.5V6.75A2.25 2.25 0 015.25 4.5h13.5A2.25 2.25 0 0121 6.75v10.5a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 16.5zm0 0l5.25-5.25a.75.75 0 011.06 0L15 16.5m0 0l2.25-2.25a.75.75 0 011.06 0L21 16.5"
+                  />
+                </svg>
+              </label>
+
+              <input
+                id={`file-input-${post.id}`}
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+            </div>
+            <div className="flex items-center space-x-2 mx-6">
+              {commentImage && (
+                <img
+                  src={commentImage}
+                  alt="Preview"
+                  className="w-30 h-30 object-cover rounded-md"
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Danh sách comment */}
+          {post.commentList.map((cmt) => (
+            <div key={cmt.id} className="flex items-start space-x-2 mb-2">
+              <img src={cmt.avatar} alt="avatar" className="w-8 h-8 rounded-full" />
+              <div className="bg-gray-100 rounded-lg px-3 py-2 text-sm max-w-[80%]">
+                <p className="font-semibold text-black">{cmt.name}</p>
+                <p>{cmt.text}</p>
+                {cmt.image && (
+                  <img
+                    src={cmt.image}
+                    alt="comment"
+                    className="mt-2 max-w-full h-auto rounded-md"
+                  />
+                )}
+                <p className="text-xs text-gray-500">{cmt.timestamp}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

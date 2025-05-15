@@ -73,7 +73,7 @@ const NavBar = () => {
           <input
             type="text"
             placeholder="Search Facebook"
-            className="text-black bg-white rounded-2xl h-10 w-3/4 p-4"
+            className="text-black bg-gray-200 rounded-2xl h-10 w-3/4 p-4 outline-none"
           />
         </div>
 
@@ -81,7 +81,7 @@ const NavBar = () => {
         <div className="w-1/2 flex items-center justify-center px-14">
           <div className="w-full h-full items-center justify-center hidden sm:flex">
             <div
-              className={`p-2 sm:p-3.5 cursor-pointer flex-1 flex justify-center hover:bg-gray-300 transition-colors ${
+              className={`p-1 sm:p-3.5 cursor-pointer flex-1 flex justify-center hover:bg-gray-300 transition-colors ${
                 actived === "home"
                   ? "border-b-4 border-blue-600"
                   : "border-b-4 border-transparent"
@@ -91,17 +91,7 @@ const NavBar = () => {
               <img src={homefb} alt="Home" className="size-5 sm:size-6" />
             </div>
             <div
-              className={`p-2 sm:p-3.5 cursor-pointer flex-1 flex justify-center hover:bg-gray-300 transition-colors ${
-                actived === "friends"
-                  ? "border-b-4 border-blue-600"
-                  : "border-b-4 border-transparent"
-              }`}
-              onClick={() => handleIconClick("friends", "/friends")}
-            >
-              <img src={friends} alt="Friends" className="size-5 sm:size-6" />
-            </div>
-            <div
-              className={`p-2 sm:p-3.5 cursor-pointer flex-1 flex justify-center hover:bg-gray-300 transition-colors ${
+              className={`p-1 sm:p-3.5 cursor-pointer flex-1 flex justify-center hover:bg-gray-300 transition-colors ${
                 actived === "videos"
                   ? "border-b-4 border-blue-600"
                   : "border-b-4 border-transparent"
@@ -109,6 +99,16 @@ const NavBar = () => {
               onClick={() => handleIconClick("videos", "/videos")}
             >
               <img src={videos} alt="Videos" className="size-5 sm:size-6" />
+            </div>
+            <div
+              className={`p-1 sm:p-3.5 cursor-pointer flex-1 flex justify-center hover:bg-gray-300 transition-colors ${
+                actived === "friends"
+                  ? "border-b-4 border-blue-600"
+                  : "border-b-4 border-transparent"
+              }`}
+              onClick={() => handleIconClick("friends", "/friends")}
+            >
+              <img src={friends} alt="Friends" className="size-5 sm:size-6" />
             </div>
 
           </div>
