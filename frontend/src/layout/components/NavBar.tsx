@@ -1,5 +1,6 @@
 import { useEffect, useRef , useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import NotificationDropdown from "../../pages/Nofication/NotificationDropdown";
 
 import {
   Squares2X2Icon,
@@ -47,11 +48,15 @@ const NavBar = () => {
   const toggleOptions = () => {
     setShowOptions((prev) => !prev);
   };
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notificationRef = useRef<HTMLDivElement>(null);
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (optionRef.current && !optionRef.current.contains(event.target as Node)) {
         setShowOptions(false);
+        setShowNotifications(false);
       }
     };
   
@@ -119,9 +124,20 @@ const NavBar = () => {
             <button className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition">
               <ChatBubbleLeftIcon className="h-6 w-6 text-gray-800" />
             </button>
-            <button className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition">
-              <BellIcon className="h-6 w-6 text-gray-800" />
-            </button>
+            <div className="relative" ref={notificationRef}>
+  <button
+    className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition"
+    onClick={() => setShowNotifications(prev => !prev)}
+  >
+    <BellIcon className="h-6 w-6 text-gray-800" />
+  </button>
+
+  {showNotifications && (
+    <div className="absolute right-0 top-12 z-50 w-[360px]">
+      <NotificationDropdown />
+    </div>
+  )}
+</div>
             <button className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition" onClick={() => handleIconClick("profile", "/profile")}>
               <UserCircleIcon className="h-6 w-6 text-gray-800" />
             </button>
