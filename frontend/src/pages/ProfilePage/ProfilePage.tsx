@@ -195,14 +195,20 @@ const ProfilePage = () => {
                     className="flex-1 p-2 border border-gray-300 rounded-full focus:outline-none cursor-pointer" readOnly/>
                 </div>
                 <div className="flex justify-around pt-2 mt-2 border-t border-gray-200">
-                  <button onClick={openModal}
-                   className="flex items-center gap-2 text-gray-600 px-4 py-1 rounded-md border border-transparent transition-all duration-200 hover:bg-gray-300">
-                    📷 Ảnh/Video
-                  </button>
-                  <button onClick={openModal}
-                    className="flex items-center gap-2 text-gray-600 px-4 py-1 rounded-md border border-transparent transition-all duration-200 hover:bg-gray-300">
-                    📅 Sự kiện
-                  </button>
+                  <div
+                    onClick={openModal}
+                    className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md cursor-pointer py-2"
+                  >
+                    <img src="/images/photo_video.png" alt="Photo/Video" className="size-7" />
+                    <label className="text-gray-600">Ảnh/Video</label>
+                  </div>
+                  <div
+                    onClick={openModal}
+                    className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md cursor-pointer py-2"
+                  >
+                    <img src="/images/live_video.png" alt="Sự kiện" className="size-7" />
+                    <label className="text-gray-600">Sự kiện</label>
+                  </div>
                 </div>
               </div>
               {/* Modal hiển thị */}

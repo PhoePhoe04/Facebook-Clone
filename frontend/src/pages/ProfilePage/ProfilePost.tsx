@@ -1,4 +1,4 @@
-import { HandThumbUpIcon, ChatBubbleOvalLeftIcon, ShareIcon } from "@heroicons/react/24/outline";
+import { HandThumbUpIcon, ChatBubbleOvalLeftIcon, ShareIcon, EllipsisHorizontalIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useState, useCallback } from "react";
 import EmojiPicker from "emoji-picker-react";
 import { EmojiClickData } from "emoji-picker-react";
@@ -47,8 +47,8 @@ const ProfilePost = () => {
     },
     {
       id: 2,
-      name: "Tên người dùng",
-      avatar: "/images/dp5.png",
+      name: "Lac",
+      avatar: "/images/avatar.png",
       timestamp: "4 giờ trước",
       content: "Cảnh này thật tuyệt vời!",
       image: "/images/pic2.jpeg",
@@ -59,7 +59,7 @@ const ProfilePost = () => {
       commentList: [],
     },
   ]);
-
+  
   const [showModal, setShowModal] = useState(false);
   const handleLikeComment = useCallback(
     (postId: number, commentId: number) => {
@@ -214,11 +214,24 @@ const Post = ({
 
   return (
     <div className="rounded-md bg-white shadow-md mb-4">
-      <div className="flex items-center p-3">
-        <img src={avatar} alt="Avatar" className="w-10 h-10 rounded-full mr-2" />
-        <div>
-          <p className="text-black font-semibold">{name}</p>
-          <p className="text-gray-500 text-xs">{timestamp}</p>
+      <div className="flex justify-between items-center p-3">
+        {/* Bên trái: Avatar và tên, timestamp */}
+        <div className="flex items-center">
+          <img src={avatar} alt="Avatar" className="w-10 h-10 rounded-full mr-2" />
+          <div>
+            <p className="text-black font-semibold">{name}</p>
+            <p className="text-gray-500 text-xs">{timestamp}</p>
+          </div>
+        </div>
+
+        {/* Bên phải: Icon button */}
+        <div className="flex items-center space-x-2">
+          <button className="text-gray-500 hover:bg-gray-200 rounded-full p-1">
+            <EllipsisHorizontalIcon className="h-6 w-6" />
+          </button>
+          <button className="text-gray-500 hover:bg-gray-200 rounded-full p-1">
+            <XMarkIcon className="h-6 w-6" />
+          </button>
         </div>
       </div>
       <div className="px-2">
@@ -233,7 +246,7 @@ const Post = ({
           </div>
         )}
       </div>
-      <div className="px-3 pb-3 border-t border-gray-200">
+      <div className="px-3 pb-3">
         <div className="flex justify-between text-gray-500 text-sm py-2">
           <div className="flex items-center space-x-1">
             <span className="text-blue-500">👍</span>
@@ -353,7 +366,7 @@ const Post = ({
                 <img
                   src={commentImage}
                   alt="Preview"
-                  className="max-w-[200px] max-h-[200px] object-cover rounded-md mx-auto"
+                  className="max-w-[200px] max-h-[200px] object-cover rounded-md"
                 />
               )}
             </div>
@@ -371,7 +384,7 @@ const Post = ({
                   <img
                     src={cmt.image}
                     alt="comment"
-                    className="mt-2 max-w-full h-auto rounded-md"
+                     className="mt-2 max-w-[400px] max-h-[400px] rounded-md"
                   />
                 )}
 
@@ -379,19 +392,11 @@ const Post = ({
                 <div className="text-xs text-gray-500 mt-1 flex space-x-3 items-center">
                   <span>{cmt.timestamp}</span>
                   <button className="hover:underline cursor-pointer" onClick={() => onLikeComment(post.id, cmt.id)}>Thích</button>
-                  <button className="hover:underline cursor-pointer">Trả lời</button>
                   <div className="flex items-center space-x-1">
                     <span role="img" aria-label="like">👍</span>
                     <span>{cmt.likeCount}</span>
                   </div>
                 </div>
-
-                {/* Phản hồi */}
-                {cmt.commentList?.length > 0 && (
-                  <div className="text-sm text-blue-600 mt-1 cursor-pointer hover:underline">
-                    Xem {cmt.commentList.length} phản hồi
-                  </div>
-                )}
               </div>
             </div>
           ))}
