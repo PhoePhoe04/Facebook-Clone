@@ -12,10 +12,12 @@ import ProfileFriend from "./pages/ProfilePage/ProfileFriend";
 import ProfilePhoto from "./pages/ProfilePage/ProfilePhoto";
     
 import AdminDashboard from "./pages/AdminPage/AdminPage";
+import ChatContainer from "./components/Chat/ChatContainer";
+import { ChatProvider } from "./contexts/ChatContext";
 
 function App() {
   return (
-    <>
+    <ChatProvider>
       <Routes>
         {/* Route dành cho giao diện người dùng */}
         <Route path="/login" element={<LoginPage />} />
@@ -36,7 +38,10 @@ function App() {
         {/* Route dành riêng cho Admin */}
         <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
-    </>
+
+      {/* Chat Container */}
+      <ChatContainer />
+    </ChatProvider>
   );
 }
 

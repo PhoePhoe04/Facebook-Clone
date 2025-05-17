@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import NotificationDropdown from "../../pages/Nofication/NotificationDropdown";
+import { useChatContext } from '../../contexts/ChatContext';
+import ChatList from "../../components/Chat/ChatList";
 
 import {
   ChatBubbleLeftIcon,
@@ -21,6 +23,7 @@ const user = {
 const NavBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isListOpen, toggleChatList } = useChatContext();
 
   const [actived, setActived] = useState<string | null>(null);
 
@@ -28,6 +31,7 @@ const NavBar = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showOptions, setShowOptions] = useState(false); // nếu cần dropdown option
   const notificationRef = useRef<HTMLDivElement>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
   const optionRef = useRef<HTMLDivElement>(null); // nếu có dropdown nào khác
 
   // Cập nhật trạng thái actived dựa trên đường dẫn hiện tại
@@ -60,10 +64,15 @@ const NavBar = () => {
         notificationRef.current &&
         !notificationRef.current.contains(event.target as Node) &&
         optionRef.current &&
-        !optionRef.current.contains(event.target as Node)
+        !optionRef.current.contains(event.target as Node) &&
+        chatRef.current &&
+        !chatRef.current.contains(event.target as Node)
       ) {
         setShowOptions(false);
         setShowNotifications(false);
+        if (isListOpen) {
+          toggleChatList();
+        }
       }
     };
 
@@ -72,7 +81,7 @@ const NavBar = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [isListOpen, toggleChatList]);
 
   return (
     <div className="fixed top-0 left-0 right-0 bg-white shadow-md z-50 h-14">
@@ -118,9 +127,20 @@ const NavBar = () => {
         {/* Right */}
         <div className="w-1/4 flex items-center justify-end">
           <div className="flex items-center space-x-2 sm:space-x-4">
-            <button className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition">
-              <ChatBubbleLeftIcon className="h-6 w-6 text-gray-800" />
-            </button>
+            <div className="relative" ref={chatRef}>
+              <button 
+                onClick={toggleChatList}
+                className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition"
+              >
+                <ChatBubbleLeftIcon className="h-6 w-6 text-gray-800" />
+              </button>
+
+              {isListOpen && (
+                <div className="absolute right-0 top-12 z-50">
+                  <ChatList />
+                </div>
+              )}
+            </div>
 
             <div className="relative" ref={notificationRef}>
               <button
