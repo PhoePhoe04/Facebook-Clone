@@ -1,14 +1,10 @@
-import { useEffect, useRef , useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import {
-  Squares2X2Icon,
   ChatBubbleLeftIcon,
   BellIcon,
-  UserCircleIcon,
-  Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
-  EllipsisHorizontalIcon,
 } from "@heroicons/react/24/outline";
 
 import fblogo from "/images/logo.png";
@@ -26,7 +22,6 @@ const NavBar = () => {
   const location = useLocation();
 
   const [actived, setActived] = useState<string | null>(null);
-  const optionRef = useRef<HTMLDivElement>(null);
 
   // Cập nhật trạng thái actived dựa trên đường dẫn hiện tại
   useEffect(() => {
@@ -43,31 +38,9 @@ const NavBar = () => {
     navigate(path);
   };
 
-  const [showOptions, setShowOptions] = useState(false);
-
   const handleLogout = () => {
     navigate("/login");
   };
-
-  const toggleOptions = () => {
-    setShowOptions((prev) => !prev);
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (optionRef.current && !optionRef.current.contains(event.target as Node)) {
-        setShowOptions(false);
-      }
-    };
-  
-    if (showOptions) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-  
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showOptions]);  
 
   return (
     <div className="fixed top-0 left-0 right-0 bg-white shadow-md z-50 h-14">
