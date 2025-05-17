@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import NotificationDropdown from "../../pages/Nofication/NotificationDropdown";
 
 import {
   ChatBubbleLeftIcon,
@@ -41,6 +42,30 @@ const NavBar = () => {
   const handleLogout = () => {
     navigate("/login");
   };
+
+  const toggleOptions = () => {
+    setShowOptions((prev) => !prev);
+  };
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notificationRef = useRef<HTMLDivElement>(null);
+
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (optionRef.current && !optionRef.current.contains(event.target as Node)) {
+        setShowOptions(false);
+        setShowNotifications(false);
+      }
+    };
+  
+    if (showOptions) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+  
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showOptions]);  
 
   return (
     <div className="fixed top-0 left-0 right-0 bg-white shadow-md z-50 h-14">
@@ -97,9 +122,20 @@ const NavBar = () => {
             <button className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition">
               <ChatBubbleLeftIcon className="h-6 w-6 text-gray-800" />
             </button>
-            <button className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition">
-              <BellIcon className="h-6 w-6 text-gray-800" />
-            </button>
+            <div className="relative" ref={notificationRef}>
+              <button
+                className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition"
+                onClick={() => setShowNotifications(prev => !prev)}
+              >
+                <BellIcon className="h-6 w-6 text-gray-800" />
+              </button>
+
+              {showNotifications && (
+                <div className="absolute right-0 top-12 z-50 w-[360px]">
+                  <NotificationDropdown />
+                </div>
+              )}
+            </div>
             <button className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition" onClick={() => handleIconClick("profile", "/profile")}>
               <img src={user.avatarImage} alt={user.name} className="h-8 w-8 rounded-full object-cover"/>
             </button>
