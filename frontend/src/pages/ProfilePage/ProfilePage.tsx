@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import ProfileTabs from './ProfileTabs';
 import ProfilePost from './ProfilePost';
 import ProfileFriend from "./ProfileFriend";
