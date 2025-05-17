@@ -4,6 +4,13 @@ import { useNavigate } from "react-router-dom";
 
 import spriteSheet from "/images/facebook-icon-sprite.png";
 
+const user = {
+  name: "Nguyễn Văn A",
+  avatarImage: "/images/avatar.png",
+  coverPreview:"images/GYuWtZPXkAAA6WT.jpg",
+  postsCount: 125
+};
+
 const LeftSideBar = () => {
   const navigate = useNavigate();
 
@@ -25,12 +32,13 @@ const LeftSideBar = () => {
 
   // Danh sách icon với 0 là trục y vì hình các icon xếp dọc chiều thẳng đứng
   const menuItems = [
-    { position: `0 ${calcHeight(9)}`, label: "Friends", path: "/friends" },
-    { position: `0 ${calcHeight(13)}`, label: "Memmories", path: "/" },
-    { position: `0 ${calcHeight(5)}`, label: "Saved", path: "/" },
-    { position: `0 ${calcHeight(1)}`, label: "Groups", path: "/" },
-    { position: `0 ${calcHeight(15)}`, label: "Videos", path: "/" },
-    { position: `0 ${calcHeight(12)}`, label: "Marketplace", path: "/" },
+    { image: user.avatarImage, label: user.name, path: "/profile",isImage: true},
+    { position: `0 ${calcHeight(9)}`, label: "Friends", path: "/friends", isImage: false },
+    { position: `0 ${calcHeight(13)}`, label: "Memories", path: "/", isImage: false },
+    { position: `0 ${calcHeight(5)}`, label: "Saved", path: "/", isImage: false },
+    { position: `0 ${calcHeight(1)}`, label: "Groups", path: "/", isImage: false },
+    { position: `0 ${calcHeight(15)}`, label: "Videos", path: "/", isImage: false },
+    { position: `0 ${calcHeight(12)}`, label: "Marketplace", path: "/", isImage: false },
   ];
 
   // Chỉ hiển thị 5 item nếu chưa mở rộng
@@ -49,14 +57,22 @@ const LeftSideBar = () => {
                 className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-100 rounded"
               >
                 {/* Icon từ sprite sheet */}
-                <div
-                  className="h-[37px] w-[37px]" // Kích thước icon: 37x37px
-                  style={{
-                    backgroundImage: `url(${spriteSheet})`,
-                    backgroundPosition: item.position,
-                    backgroundSize: "37px auto", // Chiều rộng sprite sheet: 37px
-                  }}
-                />
+                {item.isImage ? (
+                  <img
+                    src={item.image}
+                    alt={item.label}
+                    className="h-[37px] w-[37px] rounded-full object-cover"
+                  />
+                ) : (
+                  <div
+                    className="h-[37px] w-[37px]"
+                    style={{
+                      backgroundImage: `url(${spriteSheet})`,
+                      backgroundPosition: item.position,
+                      backgroundSize: "37px auto",
+                    }}
+                  />
+                )}
                 <span>{item.label}</span>
               </li>
             ))}

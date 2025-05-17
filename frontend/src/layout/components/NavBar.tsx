@@ -16,6 +16,11 @@ import homefb from "/images/homefb.png";
 import friends from "/images/friendsfb.png";
 import videos from "/images/ic_video2.png";
 
+const user = {
+  name: "Nguyễn Văn A",
+  avatarImage: "/images/avatar.png",
+};
+
 const NavBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -123,29 +128,13 @@ const NavBar = () => {
               <BellIcon className="h-6 w-6 text-gray-800" />
             </button>
             <button className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition" onClick={() => handleIconClick("profile", "/profile")}>
-              <UserCircleIcon className="h-6 w-6 text-gray-800" />
+              <img src={user.avatarImage} alt={user.name} className="h-8 w-8 rounded-full object-cover"/>
             </button>
-            <div className="relative">
-              <button
-                className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition"
-                onClick={toggleOptions}
-              >
-                <Squares2X2Icon className="h-6 w-6 text-gray-800" />
-              </button>
-                {showOptions && (
-                  <div ref={optionRef} className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-lg z-50">
-                    <button className="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100" onClick={() => alert("Cài đặt")}>
-                      <Cog6ToothIcon className="w-5 h-5 mr-2 text-gray-700" />Cài đặt
-                    </button>
-                    <button className="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100" onClick={() => alert("Tùy chọn khác")}>
-                      <EllipsisHorizontalIcon className="w-5 h-5 mr-2 text-gray-700" />Chỉnh sửa thông tin
-                    </button>
-                    <button className="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100" onClick={handleLogout}>
-                      <ArrowRightOnRectangleIcon className="w-5 h-5 mr-2 text-gray-700" />Đăng xuất
-                    </button>
-                  </div>
-                )}
-            </div>
+            <button className="flex items-center px-4 py-2 bg-gray-200 rounded-full hover:bg-gray-300 transition" onClick={handleLogout}>
+              <ArrowRightOnRectangleIcon className="h-5 w-5 mr-2 text-gray-700" />
+              <span className="hidden sm:inline">Đăng xuất</span>
+            </button>
+
           </div>
         </div>
       </div>

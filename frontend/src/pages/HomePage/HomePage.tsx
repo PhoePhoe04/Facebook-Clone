@@ -4,7 +4,7 @@ import RightSidebar from "./components/RightSideBar";
 
 const HomePage = () => {
   return (
-    <div className="flex flex-col sm:flex-row w-full mx-auto px-4 py-4 flex-1">
+    <div className="flex flex-col sm:flex-row w-full mx-auto px-1 py-2 flex-1">
       {/* Sidebar trái */}
       <div className="w-1/4 pr-4 sticky top-14 self-start max-h-[calc(100vh-56px)] overflow-y-auto">
         <LeftSideBar />
