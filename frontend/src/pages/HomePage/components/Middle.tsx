@@ -36,73 +36,76 @@ interface Post {
 const YoursMind = () => {
   const [showPostForm, setShowPostForm] = useState(false);
   const [postContent, setPostContent] = useState("");
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<{ type: 'image' | 'video', url: string } | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPostContent(e.target.value);
   };
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMediaSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const imageURL = URL.createObjectURL(file);
-      setSelectedImage(imageURL);
+      const isVideo = file.type.startsWith('video/');
+      const mediaURL = URL.createObjectURL(file);
+      setSelectedMedia({
+        type: isVideo ? 'video' : 'image',
+        url: mediaURL
+      });
     }
   };
 
   const onClose = () => {
     setShowPostForm(false);
     setPostContent("");
-    setSelectedImage(null);
+    setSelectedMedia(null);
   };
 
-  const onPost = (content: string, image: string | null) => {
-    console.log("Bài viết:", { content, image });
+  const onPost = async () => {
+    try {
+      // TODO: Implement API call to create post
+      console.log("Bài viết:", { content: postContent, media: selectedMedia });
+      onClose();
+    } catch (error) {
+      console.error("Lỗi khi đăng bài:", error);
+    }
   };
-
 
   return (
     <>
-      <div className="flex flex-col shadow-md mb-4 bg-white p-4 rounded-md space-y-2">
-        <div className="flex space-x-2 border-b-1 border-gray-200 pb-2">
-          <img src="/images/avatar.png" alt="" className="rounded-full" />
-          <input
-            type="text"
-            placeholder="What's on your mind, ... ?"
-            className="bg-gray-100 w-full px-2 rounded-2xl cursor-pointer"
-            readOnly
+      {/* Form mở đầu */}
+      <div className="bg-white rounded-lg shadow p-4 mb-4">
+        <div className="flex items-center gap-2">
+          <img src="/images/dp1.png" alt="avatar" className="w-10 h-10 rounded-full" />
+          <button
             onClick={() => setShowPostForm(true)}
-          />
+            className="bg-gray-100 hover:bg-gray-200 text-gray-500 rounded-full px-4 py-2.5 flex-1 text-left"
+          >
+            Bạn đang nghĩ gì?
+          </button>
         </div>
-        <div className="flex">
-          <div
-            className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md cursor-pointer"
+        <div className="border-t mt-3 pt-3 flex justify-between">
+          <button className="flex items-center gap-2 hover:bg-gray-100 text-gray-500 px-6 py-1.5 rounded-lg">
+            <img src="/images/live_video.png" alt="Live Video" className="w-6" />
+            <span>Video trực tiếp</span>
+          </button>
+          <button 
             onClick={() => setShowPostForm(true)}
+            className="flex items-center gap-2 hover:bg-gray-100 text-gray-500 px-6 py-1.5 rounded-lg"
           >
-            <img src="/images/live_video.png" alt="" className="size-7" />
-            <label>Live video</label>
-          </div>
-          <div
-            className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md cursor-pointer"
-            onClick={() => setShowPostForm(true)}
-          >
-            <img src="/images/photo_video.png" alt="" className="size-7" />
-            <label>Photo/video</label>
-          </div>
-          <div
-            className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md cursor-pointer"
-            onClick={() => setShowPostForm(true)}
-          >
-            <img src="/images/feeling_activity.png" alt="" className="size-7" />
-            <label>Feeling/activity</label>
-          </div>
+            <img src="/images/photo_video.png" alt="Photo/Video" className="w-6" />
+            <span>Ảnh/Video</span>
+          </button>
+          <button className="flex items-center gap-2 hover:bg-gray-100 text-gray-500 px-6 py-1.5 rounded-lg">
+            <img src="/images/feeling_activity.png" alt="Feeling/Activity" className="w-6" />
+            <span>Cảm xúc/Hoạt động</span>
+          </button>
         </div>
       </div>
 
-      {/* Form tạo bài viết */}
+      {/* Modal tạo bài viết */}
       {showPostForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-80 backdrop-blur-sm">
-          <div className="bg-white rounded-lg w-full max-w-md p-4 relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg w-full max-w-xl p-4 relative">
             <button
               onClick={onClose}
               className="absolute top-2 right-2 text-gray-500 hover:text-black"
@@ -110,7 +113,7 @@ const YoursMind = () => {
               ✕
             </button>
 
-            <h2 className="text-lg font-semibold text-center">Tạo bài viết</h2>
+            <h2 className="text-xl font-semibold text-center pb-4 border-b">Tạo bài viết</h2>
 
             <div className="flex items-center mt-4 gap-2">
               <img
@@ -131,64 +134,65 @@ const YoursMind = () => {
               className="w-full mt-4 resize-none outline-none border-none placeholder-gray-500 text-lg"
             />
 
-            {selectedImage && (
-              <div className="mt-4">
-                <img
-                  src={selectedImage}
-                  alt="Preview"
-                  className="max-h-60 rounded border"
-                />
+            {selectedMedia && (
+              <div className="mt-4 relative">
+                {selectedMedia.type === 'image' ? (
+                  <img
+                    src={selectedMedia.url}
+                    alt="Preview"
+                    className="max-h-[400px] w-full object-contain rounded"
+                  />
+                ) : (
+                  <video
+                    src={selectedMedia.url}
+                    controls
+                    className="max-h-[400px] w-full rounded"
+                  />
+                )}
                 <button
-                  onClick={() => setSelectedImage(null)}
-                  className="text-sm text-red-500 mt-2 hover:underline"
+                  onClick={() => setSelectedMedia(null)}
+                  className="absolute top-2 right-2 bg-gray-800 bg-opacity-50 text-white rounded-full p-1 hover:bg-opacity-70"
                 >
-                  Xóa ảnh
+                  ✕
                 </button>
               </div>
             )}
 
-            <div className="mt-4 flex justify-between items-center border rounded p-2 text-sm text-gray-600">
-              <span>Thêm vào bài viết của bạn</span>
-              <div className="flex gap-2">
-                <img
-                  src="/images/photo_video.png"
-                  alt="Ảnh"
-                  className="w-6 h-6 cursor-pointer"
-                  onClick={() =>
-                    document.getElementById("fileInput")?.click()
-                  }
-                />
-                <img
-                  src="/images/groups.png"
-                  alt="Gắn nhóm"
-                  className="w-6 h-6 cursor-pointer"
-                />
-                <img
-                  src="/images/feeling_activity.png"
-                  alt="Cảm xúc"
-                  className="w-6 h-6 cursor-pointer"
-                />
+            <div className="mt-4 p-3 border rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Thêm vào bài viết của bạn</span>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => document.getElementById('mediaInput')?.click()}
+                    className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center"
+                  >
+                    <img src="/images/photo_video.png" alt="Ảnh/Video" className="w-6 h-6" />
+                  </button>
+                  <button className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center">
+                    <img src="/images/feeling_activity.png" alt="Cảm xúc" className="w-6 h-6" />
+                  </button>
+                  <button className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center">
+                    <img src="/images/groups.png" alt="Gắn thẻ" className="w-6 h-6" />
+                  </button>
+                </div>
               </div>
             </div>
 
             <input
               type="file"
-              accept="image/*"
-              id="fileInput"
+              id="mediaInput"
+              accept="image/*,video/*"
               className="hidden"
-              onChange={handleImageSelect}
+              onChange={handleMediaSelect}
             />
 
             <button
-              disabled={postContent.trim() === ""}
-              onClick={() => {
-                onPost(postContent, selectedImage);
-                onClose();
-              }}
-              className={`w-full mt-4 py-2 rounded font-semibold ${
-                postContent.trim() === ""
-                  ? "bg-gray-300 text-white cursor-not-allowed"
-                  : "bg-blue-600 text-white"
+              onClick={onPost}
+              disabled={!postContent.trim() && !selectedMedia}
+              className={`w-full mt-4 py-2 rounded-lg font-semibold ${
+                !postContent.trim() && !selectedMedia
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-blue-500 hover:bg-blue-600 text-white'
               }`}
             >
               Đăng
