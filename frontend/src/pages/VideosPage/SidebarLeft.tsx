@@ -1,44 +1,65 @@
 import {
-  HomeIcon,
-  PlayCircleIcon,
-  FilmIcon,
-  TvIcon,
-  RocketLaunchIcon,
-  BookmarkIcon,
-  MagnifyingGlassIcon,
+  ChartBarIcon,
+  VideoCameraIcon,
+  PhotoIcon,
+  PresentationChartBarIcon,
+  GlobeAltIcon,
+  InboxArrowDownIcon,
+  ChevronRightIcon,
 } from "@heroicons/react/24/outline";
+import { useNavigate } from "react-router-dom";
 
-const menuItems = [
-  { icon: <HomeIcon className="h-6 w-6" />, label: "Trang chủ" },
-  { icon: <PlayCircleIcon className="h-6 w-6" />, label: "Trực tiếp" },
-  { icon: <FilmIcon className="h-6 w-6" />, label: "Reels" },
-  { icon: <TvIcon className="h-6 w-6" />, label: "Chương trình" },
-  { icon: <RocketLaunchIcon className="h-6 w-6" />, label: "Khám phá" },
-  { icon: <BookmarkIcon className="h-6 w-6" />, label: "Video đã lưu" },
+export interface SidebarItem {
+  label: string;
+  path: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+}
+
+const menuItems: SidebarItem[] = [
+  { icon: ChartBarIcon, label: "Trang chủ", path: "/" },
+  { icon: VideoCameraIcon, label: "Trực tiếp", path: "/live" },
+  { icon: PhotoIcon, label: "Reels", path: "/reels" },
+  { icon: PresentationChartBarIcon, label: "Chương trình", path: "/shows" },
+  { icon: GlobeAltIcon, label: "Khám phá", path: "/explore" },
+  { icon: InboxArrowDownIcon, label: "Video đã lưu", path: "/saved" },
 ];
 
 const SidebarLeft = () => {
+  const navigate = useNavigate();
+
+  const handleClick = (item: SidebarItem) => {
+    if (item.label === "Trang chủ") {
+      window.location.reload(); // Reload trang chủ
+    } else {
+      navigate(item.path);
+    }
+  };
+
   return (
-    <div className="w-64 bg-white p-4 shadow-md h-screen overflow-y-auto hidden md:block">
-      <div className="relative mb-4">
-        <input
-          type="text"
-          placeholder="Tìm kiếm video"
-          className="w-full pl-10 pr-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 absolute left-3 top-2.5" />
+    <div className="fixed top-15 left-0 h-screen w-[360px] bg-white shadow-md p-2 z-40">
+      {/* Tiêu đề */}
+      <div className="pl-2 pt-0.5 h-[37px]">
+        <h1 className="font-bold text-2xl">Video</h1>
       </div>
 
-      <ul className="space-y-2">
-        {menuItems.map((item, idx) => (
-          <li
-            key={idx}
-            className="flex items-center space-x-3 text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-lg cursor-pointer"
-          >
-            {item.icon}
-            <span className="text-base">{item.label}</span>
-          </li>
-        ))}
+      {/* Danh sách menu */}
+      <ul className="mt-3">
+        {menuItems.map((item, idx) => {
+          const Icon = item.icon;
+          return (
+            <li
+              key={idx}
+              onClick={() => handleClick(item)}
+              className="flex items-center p-2 h-[51px] hover:bg-gray-100 cursor-pointer rounded-md"
+            >
+              <Icon className="w-[20px] h-[20px] mr-3 text-gray-600" />
+              <span className="font-semibold ml-4 text-[17px]">{item.label}</span>
+              {item.label !== "Trang chủ" && (
+                <ChevronRightIcon className="w-[23px] h-[23px] text-gray-600 ml-auto mr-[14px]" />
+              )}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
