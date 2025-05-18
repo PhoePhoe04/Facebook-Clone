@@ -11,8 +11,9 @@ import RegisterPage from "./pages/Login and Register/RegisterPage";
 import ProfileFriend from "./pages/ProfilePage/ProfileFriend";
 import ProfilePhoto from "./pages/ProfilePage/ProfilePhoto";
 import ProfileAbout from "./pages/ProfilePage/ProfileAbout";
-    
+
 import AdminDashboard from "./pages/AdminPage/AdminPage";
+import FriendsList from "./pages/FriendsPage/all-friends";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/friends" element={<FriendsPage />} />
           <Route path="/videos" element={<VideosPage />} />
+          <Route path="/all-friends" element={<FriendsList />} />
           <Route path="/groups" element={<GroupsPage />} />
           <Route path="/gaming" element={<GamingPage />} />
           <Route path="/profile" element={<ProfilePage />}>
@@ -34,7 +36,7 @@ function App() {
           </Route>
           <Route path="*" element={<div>404</div>} />
         </Route>
-        
+
         {/* Route dành riêng cho Admin */}
         <Route path="/admin" element={<AdminDashboard />} />
       </Routes>

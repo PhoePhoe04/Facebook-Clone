@@ -50,18 +50,18 @@ const FriendsPage = () => {
     <div className="w-full sm:w-1/4 pr-[20px] sm:pr-4:w-1/4 pr-0">
       <SideBar isMobile={false} title="Bạn bè" items={SidebarItems} />
       <div className="ml-[365px] mt-0.25">
-        <div className="m-8 "> 
+        <div className="m-8 ">
           <div className="w-full pb-4 font-bold text-xl whitespace-nowrap flex">
             Lời mời kết bạn
           </div>
           <div className="grid grid-cols-5 gap-x-55 gap-y-2">
-          {friendRequests.map((request, index) => (
-            <FriendReqItem
-              key={index}
-              image={request.image}
-              name={request.name}
-            />
-          ))}
+            {friendRequests.map((request, index) => (
+              <FriendReqItem
+                key={index}
+                image={request.image}
+                name={request.name}
+              />
+            ))}
           </div>
 
         </div>
