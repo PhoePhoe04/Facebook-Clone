@@ -305,7 +305,7 @@ const PostManagementPage: React.FC = () => {
 
   const getAllPosts = async () => {
     try {
-        const response = await axios.get<Post[]>("http://localhost:8080/api/posts/getAllPosts");
+        const response = await axios.get<Post[]>("http://localhost:8080/api/posts/get-all-posts");
         setPosts(response.data);
         if (response.data.length === 0) {
             console.warn("Danh sách bài đăng rỗng!");
@@ -404,7 +404,7 @@ const PostManagementPage: React.FC = () => {
     try {
       // const userId = 1; // TODO: Thay bằng ID người dùng đã xác thực
       const response = await axios.post(
-        `http://localhost:8080/api/posts/createPost`,
+        `http://localhost:8080/api/posts/create-post`,
         addForm
       );
 
@@ -452,7 +452,7 @@ const PostManagementPage: React.FC = () => {
     }
     try {
       const response = await axios.put(
-        `http://localhost:8080/api/posts/updatePost/${editPostId}`,
+        `http://localhost:8080/api/posts/update-post/${editPostId}`,
         editForm
       );
 
@@ -476,7 +476,7 @@ const PostManagementPage: React.FC = () => {
 
     try {
       const response = await axios.delete(
-        `http://localhost:8080/api/posts/deletePost/${deletePostId}`
+        `http://localhost:8080/api/posts/delete-post/${deletePostId}`
       );
 
       setSuccess("Bài đăng đã được xóa thành công!");

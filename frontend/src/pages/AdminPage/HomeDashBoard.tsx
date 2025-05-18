@@ -7,7 +7,7 @@ const HomeDashBoard: React.FC = () => {
 
   const getCountPost = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/posts/countPost");
+      const response = await axios.get("http://localhost:8080/api/posts/count-post");
       setPostCount(response.data);
     } catch(error) {
       console.log(error);
@@ -16,7 +16,7 @@ const HomeDashBoard: React.FC = () => {
 
   const getCountUser = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/users/countUser");
+      const response = await axios.get("http://localhost:8080/api/users/count-user");
       setUserCount(response.data);
     } catch(error) {
       console.log(error);

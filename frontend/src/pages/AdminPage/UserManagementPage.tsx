@@ -49,7 +49,7 @@ const UserManagement: React.FC = () => {
     const [email, setEmail] = useState<string>("");
     const [bio, setBio] = useState<string>("");
     const [password, setPassword] = useState<string>("");
-    const [status, setStatus] = useState<string>("Active");
+    const [status, setStatus] = useState<string>("ACTIVE");
 
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [filterStatus, setFilterStatus] = useState<string>("All");
@@ -146,7 +146,6 @@ const UserManagement: React.FC = () => {
              if (e.target) e.target.value = '';
              return;
         }
-
 
         console.log("Original file selected:", file.name, file.type, (file.size / 1024).toFixed(2) + " KB");
 
@@ -291,7 +290,7 @@ const UserManagement: React.FC = () => {
         setError(""); // Clear previous errors
         try {
             // Adjusted type to expect User[] directly as per previous discussions
-            const response = await axios.get<User[]>("http://localhost:8080/api/users/getAllUsers");
+            const response = await axios.get<User[]>("http://localhost:8080/api/users/get-all-users");
             // Ensure response data is an array and process it
             // Map to ensure 'posts' is an empty array if not provided by backend, to match interface
             const data = Array.isArray(response.data)
@@ -477,7 +476,7 @@ const UserManagement: React.FC = () => {
 
         try {
             // Send PUT request to update the user
-            const response = await axios.put<User>(`http://localhost:8080/api/users/editUser/${id}`, editForm);
+            const response = await axios.put<User>(`http://localhost:8080/api/users/edit-user/${id}`, editForm);
             console.log("Backend response data (EditUser):", response.data); // Log entire response data
 
             // Re-fetch all users to update the table with the edited user's data
@@ -619,17 +618,18 @@ const UserManagement: React.FC = () => {
         setPassword(""); // Clear password field
         setSelectedAvatarFile(null); // Clear selected file (đã resize)
         // Reset status to the default value "Active"
-        setStatus("Active");
+        setStatus("ACTIVE");
         setValidateError({}); // Clear validation errors
         setError(""); // Clear general error
     };
 
     const deleteUser = async (user:User) => {
         if (window.confirm("Bạn có chắc chắn muốn xóa người dùng này không?")) {
-            if(user.status === "Locked" && !friends) {
+            console.log(user.id);
+            if(user.status === "LOCKED" && friends.length === 0) {
                 try {
-                    await axios.delete(`http://localhost:8080/api/users/deleteUser/${id}`);
-                    console.log("User deleted:", id);
+                    await axios.delete(`http://localhost:8080/api/users/delete-user/${user.id}`);
+                    console.log("User deleted:", user.id);
                     // Re-fetch users to update the table
                     getAllUsers();
                 } catch (err) {
@@ -744,8 +744,8 @@ const UserManagement: React.FC = () => {
                         style={styles.selectFilter}
                     >
                         <option value="All">Tất cả</option>
-                        <option value="Active">Active</option>
-                        <option value="Locked">Locked</option>
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="LOCKEDd">LOCKED</option>
                     </select>
                     <button
                         style={{ ...styles.addButton, backgroundColor: "#6c757d" }}
@@ -806,7 +806,7 @@ const UserManagement: React.FC = () => {
                                     <td
                                         style={{
                                             ...styles.tableCell,
-                                            color: user.status === "Locked" ? "#dc3545" : "#28a745",
+                                            color: user.status === "LOCKED" ? "#dc3545" : "#28a745",
                                             ...(index === currentUsers.length - 1 ? styles.lastRowCell : {})
                                         }}
                                     >
@@ -964,8 +964,8 @@ const UserManagement: React.FC = () => {
                                 value={status} // Bound to status state
                                 onChange={(e) => setStatus(e.target.value)} // Updates status state
                                 style={styles.formSelect}>
-                                <option value="Active">Active</option>
-                                <option value="Locked">Locked</option>
+                                <option value="ACTIVE">ACTIVE</option>
+                                <option value="LOCKED">LOCKED</option>
                             </select>
                              {/* No validation error for status in validateForm, but could add one */}
 
@@ -1051,8 +1051,8 @@ const UserManagement: React.FC = () => {
                                 onChange={(e) => setStatus(e.target.value)} // Updates status state
                                 style={styles.formSelect}
                             >
-                                <option value="Active">Active</option>
-                                <option value="Locked">Locked</option>
+                                <option value="ACTIVE">ACTIVE</option>
+                                <option value="LOCKED">LOCKED</option>
                             </select>
                             {/* No validation error for status */}
 
