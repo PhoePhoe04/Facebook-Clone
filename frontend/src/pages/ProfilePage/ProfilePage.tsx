@@ -34,7 +34,7 @@ const friends = [
 const user = {
   name: "Nguyễn Văn A",
   avatarImage: "/images/dp1.png",
-  coverPreview:"images/GYuWtZPXkAAA6WT.jpg",
+  coverPreview:"/images/GYuWtZPXkAAA6WT.jpg",
   postsCount: 125
 };
 
@@ -100,7 +100,7 @@ const ProfilePage = () => {
                 <div className="flex items-end gap-4">
                   {/* Avatar */}
                   <div className="relative">
-                    <img src={avatarPreview || user.avatarImage} alt="Avatar" className="w-50 h-50 rounded-full border-4 border-white shadow-lg object-cover"/>
+                    <img src={avatarPreview || user.avatarImage} alt="Avatar" className="w-[200px] h-[200px] rounded-full border-4 border-white shadow-lg object-cover"/>
                     <label className="absolute bottom-2 right-2 bg-gray-200 p-1 rounded-full cursor-pointer hover:bg-gray-300">
                       <img src="/images/camera1.jpeg" alt="Chọn ảnh đại diện" className="h-5 w-5 object-contain"/>
                       <input type="file" className="hidden" onChange={handleAvatarChange} />
