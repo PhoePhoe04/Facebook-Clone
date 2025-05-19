@@ -64,6 +64,11 @@ const ProfilePage = () => {
       }
     }
   };
+  useEffect(() => {
+    if (userData && !userData.name) {
+      fetchUserData(userData.id);
+    }
+  }, [userData]);
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -96,7 +101,7 @@ const ProfilePage = () => {
       const response = await axios.get(`http://localhost:8080/api/users/${userId}`);
       if (response.status >= 200 && response.status < 300) {
         setUserData(response.data);
-        localStorage.setItem("currentUser", JSON.stringify(response.data)); // Cập nhật localStorage nếu cần
+        localStorage.setItem("currentUser", JSON.stringify(response.data)); 
       } else {
         console.error("Lỗi khi tải lại thông tin người dùng:", response.status);
       }
@@ -226,7 +231,12 @@ const ProfilePage = () => {
     const editProfileForm = new FormData();
     if(userData) {
       console.log(selectedAvatarFile);
-      editProfileForm.append('name', userName);
+      if (userName.trim() !== "") {
+        editProfileForm.append('name', userName);
+      } else {
+        editProfileForm.append('name', userData.name); // fallback
+      }
+
       if(selectedAvatarFile) {
         editProfileForm.append('avatarFile', selectedAvatarFile)
       }
@@ -372,7 +382,7 @@ const ProfilePage = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-semibold mb-1">Ảnh đại diện hiện tại</label>
-                        <img src={getAvatarSrc(userData!) || "/images/dp0.png"} alt="Avatar Preview" className="w-24 h-24 rounded-full object-cover mb-2" />
+                        <img src={getAvatarSrc(userData!)} alt="Avatar Preview" className="w-24 h-24 rounded-full object-cover mb-2" />
                         <input type="file" accept="image/*" className="w-full" onChange={handleAvatarChange} />
                       </div>
                       <div>
