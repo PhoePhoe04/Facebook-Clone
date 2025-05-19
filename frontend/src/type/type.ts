@@ -4,6 +4,14 @@ export interface User {
   name: string;
   email: string;
   avatarUrl?: string | null;
+  coverUrl?: string | null;
+  avatarImage?: string | null;
+  imageCover?: string | null;
+  avatarContentType?: string | null;
+  bio?: string | null;
+  status?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Interface cho Post
@@ -41,8 +49,33 @@ export interface PostProps {
   imageContentType?: string | null;
   likesCount: number;
   commentsCount: number;
-  sharesCount: number;
   isLiked: boolean;
   onLike: (id: number, newLikes: number, newIsLiked: boolean) => void;
-  currentUserId: number;
+  onCommentAdded: (id: number, newCommentsCount: number) => void;
+  currentUser: User;
+}
+
+// Interface cho Comment
+export interface CommentType {
+  id: number;
+  content: string;
+  createdAt: string;
+  user: {
+    id: number;
+    name: string;
+    avatarUrl?: string | null;
+  };
+  post: {
+    id: number;
+  };
+}
+
+// Interface cho props của Comment
+export interface CommentProps {
+  comment: CommentType;
+}
+
+// Interface cho props của YoursMind
+export interface YoursMindProps {
+  currentUser: User;
 }
