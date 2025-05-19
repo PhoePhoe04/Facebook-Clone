@@ -3,7 +3,6 @@ import ProfileTabs from './ProfileTabs';
 import ProfilePost from './ProfilePost';
 import ProfileFriend from "./ProfileFriend";
 import ProfilePhoto from "./ProfilePhoto";
-import PostModal from "./PostModal";
 
 const images = [
   "/images/dp1.png",
@@ -38,17 +37,14 @@ const user = {
   postsCount: 125
 };
 
-
 const ProfilePage = () => {
   const [avatarPreview, setAvatarPreview] = useState("");
   const [coverPreview, setCoverPreview] = useState("");
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [activeMain, setActiveMain] = useState("Bài viết");
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [userData, setUserData] = useState(user);
+  const [editName, setEditName] = useState(user.name);
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -68,10 +64,6 @@ const ProfilePage = () => {
     }
   };
 
-  const handlePost = (postData: any) => {
-    console.log("Bài viết mới:", postData);
-  };
-  
   return (
     <div className="flex flex-col min-h-screen bg-white-fff">
       {/* Header */}
@@ -84,7 +76,7 @@ const ProfilePage = () => {
             {/* Phần ảnh bìa và ảnh đại diện */}
             <div className="relative">
               {/* Ảnh bìa */}
-              <img src={coverPreview || user.coverPreview} alt="Cover"className="w-full h-96 object-cover rounded-b-xl shadow-md"/>
+              <img src={coverPreview || userData.coverPreview} alt="Cover" className="w-full h-96 object-cover rounded-b-xl shadow-md"/>
               {/* Overlay + nút chỉnh sửa */}
               <label className="absolute top-4 right-4 flex items-center gap-2 px-3 py-1 bg-white text-black rounded-md shadow-md cursor-pointer hover:bg-gray-100 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -100,7 +92,7 @@ const ProfilePage = () => {
                 <div className="flex items-end gap-4">
                   {/* Avatar */}
                   <div className="relative">
-                    <img src={avatarPreview || user.avatarImage} alt="Avatar" className="w-[200px] h-[200px] rounded-full border-4 border-white shadow-lg object-cover"/>
+                    <img src={avatarPreview || userData.avatarImage} alt="Avatar" className="w-[200px] h-[200px] rounded-full border-4 border-white shadow-lg object-cover"/>
                     <label className="absolute bottom-2 right-2 bg-gray-200 p-1 rounded-full cursor-pointer hover:bg-gray-300">
                       <img src="/images/camera1.jpeg" alt="Chọn ảnh đại diện" className="h-5 w-5 object-contain"/>
                       <input type="file" className="hidden" onChange={handleAvatarChange} />
@@ -108,7 +100,7 @@ const ProfilePage = () => {
                   </div>
                   {/* Tên và số bạn */}
                   <div>
-                    <h1 className="text-3xl font-bold text-gray-800">{user.name}</h1>
+                    <h1 className="text-3xl font-bold text-gray-800">{userData.name}</h1>
                     <p className="text-gray-500">{user.postsCount} người bạn</p>
                   </div>
                 </div>
@@ -142,7 +134,7 @@ const ProfilePage = () => {
         {activeMain === "Bạn bè" ? (
           <ProfileFriend />
         ) : activeMain === "Ảnh" ? ( 
-          <ProfilePhoto />
+           <ProfilePhoto />
         ) : (
           <div className="w-3/5 flex flex-row min-h-screen">
             <div className="w-2/5 p-2 rounded-lg">
@@ -181,54 +173,47 @@ const ProfilePage = () => {
               </div>
             </div>
             <div className="w-3/5 p-2">
-              {/* Thanh nhập trạng thái */}
-              <div className="bg-white px-4 py-2 rounded-lg shadow-md">
-                <div className="flex items-center gap-2">
-                  <img src={user.avatarImage || "/images/dp0.png"} alt="Avatar" className="w-10 h-10 rounded-full" />
-                  <input type="text" placeholder="Bạn đang nghĩ gì?" onClick={openModal}
-                    className="flex-1 p-2 border border-gray-300 rounded-full focus:outline-none cursor-pointer" readOnly/>
-                </div>
-                <div className="flex justify-around pt-2 mt-3 border-t border-gray-200 py-2">
-                  <div className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md">
-                    <img src="/images/live_video.png" alt="" className="size-7" />
-                    <label>Live video</label>
-                  </div>
-                  <button
-                    onClick={openModal}
-                    className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md">
-                    <img src="/images/photo_video.png" alt="" className="size-7" />
-                    <label>Photo/video</label>
-                  </button>
-                  <div className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md">
-                    <img src="/images/feeling_activity.png" alt="" className="size-7" />
-                    <label>Feeling/activity</label>
-                  </div>
-                </div>
-              </div>
-              {/* Modal hiển thị */}
-              <PostModal isOpen={isModalOpen} onClose={closeModal} onPost={handlePost} />
               {isEditFormOpen && (
                 <div className="fixed inset-0 backdrop-blur-sm flex justify-center items-center z-50">
                   <div className="bg-white p-6 rounded-lg w-96 relative">
                     <button className="absolute top-2 right-2 text-gray-600 hover:text-black"
                       onClick={() => setIsEditFormOpen(false)}>✖</button>
                     <h2 className="text-xl font-bold mb-4">Chỉnh sửa thông tin</h2>
-                    <form className="flex flex-col gap-3">
+                    <form 
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        setUserData(prev => ({
+                          ...prev,
+                          name: editName,
+                          avatarImage: avatarPreview || prev.avatarImage,
+                          coverPreview: coverPreview || prev.coverPreview
+                        }));
+                        setIsEditFormOpen(false);
+                      }}
+                      className="flex flex-col gap-3"
+                    >
                       <div>
                         <label className="block text-sm font-semibold">Tên người dùng</label>
-                        <input type="text" defaultValue={user.name} className="w-full border px-3 py-2 rounded-md" />
+                        <input 
+                          type="text" 
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="w-full border px-3 py-2 rounded-md" 
+                        />
                       </div>
                       <div>
                         <label className="block text-sm font-semibold mb-1">Ảnh đại diện hiện tại</label>
-                        <img src={avatarPreview || user.avatarImage} alt="Avatar Preview" className="w-24 h-24 rounded-full object-cover mb-2" />
+                        <img src={avatarPreview || userData.avatarImage} alt="Avatar Preview" className="w-24 h-24 rounded-full object-cover mb-2" />
                         <input type="file" accept="image/*" className="w-full" onChange={handleAvatarChange} />
                       </div>
                       <div>
                         <label className="block text-sm font-semibold mb-1">Ảnh bìa hiện tại</label>
-                        <img src={coverPreview || user.coverPreview} alt="Cover Preview" className="w-full h-32 object-cover mb-2 rounded" />
+                        <img src={coverPreview || userData.coverPreview} alt="Cover Preview" className="w-full h-32 object-cover mb-2 rounded" />
                         <input type="file" accept="image/*" className="w-full" onChange={handleCoverChange} />
                       </div>
-                      <button type="submit" className="bg-blue-600 text-white px-4 py-2 mt-4 rounded-md hover:bg-blue-700">Lưu thay đổi</button>
+                      <button type="submit" className="bg-blue-600 text-white px-4 py-2 mt-4 rounded-md hover:bg-blue-700">
+                        Lưu thay đổi
+                      </button>
                     </form>
                   </div>
                 </div>

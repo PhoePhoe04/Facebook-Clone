@@ -4,10 +4,18 @@ import { User } from "../../type/type.ts";
 interface PostModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onPost: (content: string, image: string | null, status: string) => void;
+  onPost: (postData: {
+    content: string;
+    image: string | null;
+    status: string;
+  }) => void;
+  currentUser: {
+    name: string;
+    avatar: string;
+  };
 }
 
-const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onPost }) => {
+const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onPost, currentUser }) => {
   const [postContent, setPostContent] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -54,11 +62,16 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onPost }) => {
     if (!postContent.trim()) return;
 
     setIsLoading(true);
+    // Giả lập delay khi đăng bài
     setTimeout(() => {
-      onPost(postContent, previewUrl, status);
+      onPost({
+        content: postContent,
+        image: previewUrl,
+        status
+      });
       setIsLoading(false);
       onClose();
-    }, 1000); // giả lập loading
+    }, 1000);
   };
 
   if (!isOpen) return null;
