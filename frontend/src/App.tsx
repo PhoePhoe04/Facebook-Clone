@@ -10,7 +10,7 @@ import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import RegisterPage from "./pages/Login and Register/RegisterPage";
 import ProfileFriend from "./pages/ProfilePage/ProfileFriend";
 import ProfilePhoto from "./pages/ProfilePage/ProfilePhoto";
-    
+import FriendsList from "./pages/FriendsPage/allFriend";
 import AdminDashboard from "./pages/AdminPage/AdminPage";
 import ChatContainer from "./components/Chat/ChatContainer";
 import { ChatProvider } from "./contexts/ChatContext";
@@ -28,10 +28,12 @@ function App() {
           <Route path="/videos" element={<VideosPage />} />
           <Route path="/groups" element={<GroupsPage />} />
           <Route path="/gaming" element={<GamingPage />} />
+          <Route path="/profile/:userId" element={<ProfilePage />} />
           <Route path="/profile" element={<ProfilePage />}>
-            <Route path="friend" element={<ProfileFriend />} />
-            <Route path="photo" element={<ProfilePhoto />} />
+          <Route path="friend" element={<ProfileFriend />} />
+          <Route path="photo" element={<ProfilePhoto />} />
           </Route>
+          <Route path="/allFriend" element={<FriendsList />} />
           <Route path="*" element={<div>404</div>} />
         </Route>
         
