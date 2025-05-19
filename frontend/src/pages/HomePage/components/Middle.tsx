@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
   ChatBubbleOvalLeftIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   HandThumbUpIcon,
 } from "@heroicons/react/24/outline";
 import {
@@ -16,6 +14,7 @@ import {
   PostType,
   HeaderPostProps,
   PostProps,
+  PostModalProps,
   CommentType,
   CommentProps,
   YoursMindProps,
@@ -24,6 +23,7 @@ import {
 // What's on your mind
 const YoursMind = ({ currentUser }: YoursMindProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [posts, setPosts] = useState<PostProps[]>([]);
 
   const handlePhotoVideoClick = () => {
     setIsModalOpen(true);
@@ -45,10 +45,6 @@ const YoursMind = ({ currentUser }: YoursMindProps) => {
         />
       </div>
       <div className="flex">
-        {/* <div className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md">
-          <img src="/images/live_video.png" alt="" className="size-7" />
-          <label>Live video</label>
-        </div> */}
         <button
           onClick={handlePhotoVideoClick}
           className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md"
@@ -56,310 +52,148 @@ const YoursMind = ({ currentUser }: YoursMindProps) => {
           <img src="/images/photo_video.png" alt="" className="size-7" />
           <label>Photo/video</label>
         </button>
-        {/* <div className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md">
-          <img src="/images/feeling_activity.png" alt="" className="size-7" />
-          <label>Feeling/activity</label>
-        </div> */}
       </div>
       <CreatePostModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        user={currentUser}
+        onPostAdded={(newPost: PostProps) => setPosts([newPost, ...posts])}
+        currentUser={currentUser}
       />
     </div>
   );
 };
 
-// const CreatePostModal = ({
-//   isOpen,
-//   onClose,
-//   user,
-// }: {
-//   isOpen: boolean;
-//   onClose: () => void;
-//   user: User;
-// }) => {
-//   const [content, setContent] = useState("");
-//   const [media, setMedia] = useState<File | null>(null);
-//   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-//   const [status, setStatus] = useState("public");
-//   const [isLoading, setIsLoading] = useState(false);
-//   const fileInputRef = useRef<HTMLInputElement>(null);
+//   const [canScrollLeft, setCanScrollLeft] = useState(false);
+//   const [canScrollRight, setCanScrollRight] = useState(true);
 
-//   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const file = e.target.files?.[0];
-//     if (file) {
-//       if (file.size > 10 * 1024 * 1024) {
-//         // Giới hạn 10MB
-//         alert("File too large. Maximum size is 10MB.");
-//         return;
-//       }
-//       setMedia(file);
-//       const url = URL.createObjectURL(file);
-//       setPreviewUrl(url);
+//   const storiesRef = useRef<HTMLDivElement | null>(null);
+
+//   useEffect(() => {
+//     checkScroll();
+//     const storiesElement = storiesRef.current;
+//     storiesElement?.addEventListener("scroll", checkScroll);
+//     return () => storiesElement?.removeEventListener("scroll", checkScroll);
+//   }, []);
+
+//   const checkScroll = () => {
+//     if (storiesRef.current) {
+//       const { scrollLeft, scrollWidth, clientWidth } = storiesRef.current;
+//       setCanScrollLeft(scrollLeft > 0);
+//       setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
 //     }
 //   };
 
-//   const handleRemoveMedia = () => {
-//     setMedia(null);
-//     setPreviewUrl(null);
-//     if (fileInputRef.current) {
-//       fileInputRef.current.value = "";
-//     }
-//   };
+//   const storyWidth = 144;
+//   const gap = 16;
+//   const storiesPerView = 3;
+//   const scrollDistance =
+//     storiesPerView * storyWidth + (storiesPerView - 1) * gap;
 
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     if (!content.trim()) {
-//       alert("Content is required.");
-//       return;
-//     }
-
-//     setIsLoading(true);
-//     try {
-//       const formData = new FormData();
-//       formData.append("content", content);
-//       formData.append("status", status);
-//       if (media) {
-//         if (media.type.startsWith("image/")) {
-//           formData.append("imageFile", media);
-//         } else if (media.type.startsWith("video/")) {
-//           formData.append("videoFile", media);
-//         }
-//       }
-
-//       console.log("FormData:", {
-//         content,
-//         status,
-//         imageFile: media?.type.startsWith("image/") ? media.name : null,
-//         videoFile: media?.type.startsWith("video/") ? media.name : null,
+//   const scrollLeft = () => {
+//     if (storiesRef.current) {
+//       storiesRef.current.scrollBy({
+//         left: -scrollDistance,
+//         behavior: "smooth",
 //       });
-
-//       const response = await fetch(
-//         "http://localhost:8080/api/posts/create-post",
-//         {
-//           method: "POST",
-//           body: formData,
-//           headers: {
-//             // Nếu cần token: "Authorization": `Bearer ${yourToken}`,
-//           },
-//         }
-//       );
-
-//       if (!response.ok) {
-//         const errorText = await response.text();
-//         console.error("API error:", response.status, errorText);
-//         throw new Error(
-//           `Failed to create post: ${response.status} - ${errorText}`
-//         );
-//       }
-
-//       const result = await response.json();
-//       console.log("Post created:", result);
-//       setContent("");
-//       setMedia(null);
-//       setPreviewUrl(null);
-//       setStatus("public");
-//       onClose();
-//     } catch (error: any) {
-//       console.error("Error creating post:", error);
-//       alert(`Failed to create post: ${error.message}`);
-//     } finally {
-//       setIsLoading(false);
 //     }
 //   };
 
-//   if (!isOpen) return null;
+//   const scrollRight = () => {
+//     if (storiesRef.current) {
+//       storiesRef.current.scrollBy({
+//         left: scrollDistance,
+//         behavior: "smooth",
+//       });
+//     }
+//   };
 
 //   return (
-//     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-//       <div className="bg-white rounded-lg w-full max-w-md p-4 relative">
-//         {isLoading && (
-//           <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50">
-//             <svg
-//               className="animate-spin h-8 w-8 text-blue-500"
-//               viewBox="0 0 24 24"
-//             >
-//               <circle
-//                 className="opacity-25"
-//                 cx="12"
-//                 cy="12"
-//                 r="10"
-//                 stroke="currentColor"
-//                 strokeWidth="4"
-//               />
-//               <path
-//                 className="opacity-75"
-//                 fill="currentColor"
-//                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-//               />
-//             </svg>
-//           </div>
-//         )}
-//         <div className="flex items-center justify-between border-b border-gray-200 pb-2">
-//           <h2 className="text-lg font-semibold">Create Post</h2>
-//           <button
-//             onClick={onClose}
-//             className="text-gray-500 hover:text-gray-700"
+//     <div className="relative mb-4">
+//       {canScrollLeft && (
+//         <button
+//           onClick={scrollLeft}
+//           className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md"
+//         >
+//           <ChevronLeftIcon className="h-6 w-6 text-gray-800" />
+//         </button>
+//       )}
+//       <div
+//         ref={storiesRef}
+//         className="flex flex-row gap-4 overflow-x-auto scrollbar-hidden snap-x snap-mandatory"
+//       >
+//         {Array.from({ length: 12 }).map((_, index) => (
+//           <div
+//             key={index}
+//             className="w-36 h-48 border-2 border-gray-400 rounded-lg flex-shrink-0 snap-center bg-gray-200 flex items-center justify-center"
 //           >
-//             <svg
-//               className="h-6 w-6"
-//               fill="none"
-//               viewBox="0 0 24 24"
-//               stroke="currentColor"
-//             >
-//               <path
-//                 strokeLinecap="round"
-//                 strokeLinejoin="round"
-//                 strokeWidth={2}
-//                 d="M6 18L18 6M6 6l12 12"
-//               />
-//             </svg>
-//           </button>
-//         </div>
-//         <div className="mt-4">
-//           <div className="flex items-center space-x-2">
-//             <img
-//               src={user.avatarUrl || "/images/avatar.png"}
-//               alt={user.name}
-//               className="h-10 w-10 rounded-full"
-//             />
-//             <div>
-//               <span className="font-semibold">{user.name}</span>
-//             </div>
+//             Story {index + 1}
 //           </div>
-//           <form onSubmit={handleSubmit} className="mt-4">
-//             <textarea
-//               value={content}
-//               onChange={(e) => setContent(e.target.value)}
-//               placeholder="What's on your mind?"
-//               className="w-full h-24 p-2 border border-gray-300 rounded-md resize-none"
-//               required
-//             />
-//             <select
-//               value={status}
-//               onChange={(e) => setStatus(e.target.value)}
-//               className="mt-2 w-full p-2 border border-gray-300 rounded-md"
-//             >
-//               <option value="public">Public</option>
-//               <option value="friends">Friends</option>
-//               <option value="private">Private</option>
-//             </select>
-//             {previewUrl && (
-//               <div className="relative mt-4">
-//                 {media?.type.startsWith("image/") ? (
-//                   <img
-//                     src={previewUrl}
-//                     alt="Preview"
-//                     className="max-h-64 w-full object-contain rounded-md"
-//                   />
-//                 ) : (
-//                   <video
-//                     src={previewUrl}
-//                     controls
-//                     className="max-h-64 w-full object-contain rounded-md"
-//                   />
-//                 )}
-//                 <button
-//                   onClick={handleRemoveMedia}
-//                   className="absolute top-2 right-2 bg-gray-800 text-white rounded-full p-1"
-//                 >
-//                   <svg
-//                     className="h-5 w-5"
-//                     fill="none"
-//                     viewBox="0 0 24 24"
-//                     stroke="currentColor"
-//                   >
-//                     <path
-//                       strokeLinecap="round"
-//                       strokeLinejoin="round"
-//                       strokeWidth={2}
-//                       d="M6 18L18 6M6 6l12 12"
-//                     />
-//                   </svg>
-//                 </button>
-//               </div>
-//             )}
-//             <input
-//               type="file"
-//               accept="image/*,video/*"
-//               onChange={handleFileChange}
-//               ref={fileInputRef}
-//               className="mt-4"
-//               hidden
-//             />
-//             <button
-//               type="button"
-//               onClick={() => fileInputRef.current?.click()}
-//               className="mt-2 w-full bg-gray-100 p-2 rounded-md flex items-center justify-center space-x-2"
-//             >
-//               <img src="/images/photo_video.png" alt="" className="size-6" />
-//               <span>Add Photo/Video</span>
-//             </button>
-//             <button
-//               type="submit"
-//               disabled={isLoading || !content.trim()}
-//               className={`mt-4 w-full bg-blue-500 text-white p-2 rounded-md ${
-//                 isLoading || !content.trim()
-//                   ? "opacity-50 cursor-not-allowed"
-//                   : "hover:bg-blue-600"
-//               }`}
-//             >
-//               {isLoading ? "Posting..." : "Post"}
-//             </button>
-//           </form>
-//         </div>
+//         ))}
 //       </div>
+//       {canScrollRight && (
+//         <button
+//           onClick={scrollRight}
+//           className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md"
+//         >
+//           <ChevronRightIcon className="h-6 w-6 text-gray-800" />
+//         </button>
+//       )}
 //     </div>
 //   );
 // };
 
-// Stories
-
+// Header của Post
 const CreatePostModal = ({
   isOpen,
   onClose,
-  user,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-  user: User;
-}) => {
+  onPostAdded,
+  currentUser,
+}: PostModalProps) => {
   const [content, setContent] = useState("");
-  const [media, setMedia] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [status, setStatus] = useState("public");
+  const [selectedVideoUrl, setSelectedVideoUrl] = useState<string>("");
+  const [status, setStatus] = useState("PUBLIC");
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Hardcode danh sách video
+  // const videos = ["video1.mp4", "video2.mp4"];
+  const videoFiles = import.meta.glob("/public/videos/*.{mp4,webm,ogg}", {
+    as: "url",
+    eager: true,
+  });
+  const videos = Object.keys(videoFiles).map((path) =>
+    path.replace("/public/videos/", "")
+  );
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const maxSize = file.type.startsWith("image/")
-        ? 10 * 1024 * 1024
-        : 50 * 1024 * 1024;
-      if (file.size > maxSize) {
-        alert(`File too large. Maximum size is ${maxSize / 1024 / 1024}MB.`);
+      if (!file.type.startsWith("image/")) {
+        alert("Vui lòng chọn file ảnh (JPEG, PNG, GIF)");
         return;
       }
-      setMedia(file);
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
+      setImageFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
     }
   };
 
   const handleRemoveMedia = () => {
-    setMedia(null);
+    setImageFile(null);
     setPreviewUrl(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+    setSelectedVideoUrl("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim()) {
-      alert("Content is required.");
+    if (!content.trim() && !imageFile && !selectedVideoUrl) {
+      alert("Vui lòng nhập nội dung, chọn ảnh hoặc video");
+      return;
+    }
+    if (!currentUser || !currentUser.id) {
+      alert("Bạn chưa đăng nhập hoặc thiếu ID người dùng");
       return;
     }
 
@@ -368,19 +202,20 @@ const CreatePostModal = ({
       const formData = new FormData();
       formData.append("content", content);
       formData.append("status", status);
-      if (media) {
-        if (media.type.startsWith("image/")) {
-          formData.append("imageFile", media);
-        } else if (media.type.startsWith("video/")) {
-          formData.append("videoFile", media);
-        }
+      formData.append("userId", currentUser.id.toString());
+      if (imageFile) {
+        formData.append("imageFile", imageFile);
+      }
+      if (selectedVideoUrl) {
+        formData.append("videoUrl", selectedVideoUrl); // Gửi tên file
       }
 
       console.log("FormData:", {
         content,
         status,
-        imageFile: media?.type.startsWith("image/") ? media.name : null,
-        videoFile: media?.type.startsWith("video/") ? media.name : null,
+        userId: currentUser.id,
+        imageFile: imageFile?.name,
+        videoUrl: selectedVideoUrl,
       });
 
       const response = await fetch(
@@ -388,30 +223,46 @@ const CreatePostModal = ({
         {
           method: "POST",
           body: formData,
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
         }
       );
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("API error:", response.status, errorText);
         throw new Error(
           `Failed to create post: ${response.status} - ${errorText}`
         );
       }
 
       const result = await response.json();
-      console.log("Post created:", result);
+      // Chuyển đổi result thành PostProps
+      const newPost: PostProps = {
+        id: result.id,
+        name: result.user.name,
+        avatar: result.user.avatarUrl,
+        timestamp: result.createdAt,
+        content: result.content,
+        imageUrl: result.imageUrl,
+        imageContentType: result.imageContentType,
+        videoUrl: result.videoUrl,
+        likesCount: result.likes?.length || 0,
+        commentsCount: result.comments?.length || 0,
+        isLiked: false, // Giả sử mặc định chưa like
+        onLike: () => {}, // Placeholder, sẽ được gán bởi parent
+        onCommentAdded: () => {}, // Placeholder
+        currentUser,
+      };
+
       setContent("");
-      setMedia(null);
+      setImageFile(null);
       setPreviewUrl(null);
-      setStatus("public");
+      setSelectedVideoUrl("");
+      setStatus("PUBLIC");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      onPostAdded(newPost);
       onClose();
     } catch (error: any) {
       console.error("Error creating post:", error);
-      alert(`Failed to create post: ${error.message}`);
+      alert(`Lỗi khi đăng bài: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -468,12 +319,12 @@ const CreatePostModal = ({
         <div className="mt-4">
           <div className="flex items-center space-x-2">
             <img
-              src={user.avatarUrl || "/images/avatar.png"}
-              alt={user.name}
+              src={currentUser?.avatarUrl || "/images/avatar.png"}
+              alt={currentUser?.name}
               className="h-10 w-10 rounded-full"
             />
             <div>
-              <span className="font-semibold">{user.name}</span>
+              <span className="font-semibold">{currentUser?.name}</span>
             </div>
           </div>
           <form onSubmit={handleSubmit} className="mt-4">
@@ -489,21 +340,52 @@ const CreatePostModal = ({
               onChange={(e) => setStatus(e.target.value)}
               className="mt-2 w-full p-2 border border-gray-300 rounded-md"
             >
-              <option value="public">Public</option>
-              <option value="friends">Friends</option>
-              <option value="private">Private</option>
+              <option value="PUBLIC">Public</option>
+              <option value="FRIENDS">Friends</option>
+              <option value="PRIVATE">Private</option>
             </select>
-            {previewUrl && (
+            <div className="mt-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                ref={fileInputRef}
+                className="hidden"
+                id="imageInput"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full bg-gray-100 p-2 rounded-md flex items-center justify-center space-x-2"
+              >
+                <img src="/images/photo.png" alt="" className="size-6" />
+                <span>Add Photo</span>
+              </button>
+              <select
+                value={selectedVideoUrl}
+                onChange={(e) => setSelectedVideoUrl(e.target.value)}
+                className="mt-2 w-full p-2 border border-gray-300 rounded-md"
+              >
+                <option value="">Select Video</option>
+                {videos.map((video) => (
+                  <option key={video} value={video}>
+                    {video}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {(previewUrl || selectedVideoUrl) && (
               <div className="relative mt-4">
-                {media?.type.startsWith("image/") ? (
+                {previewUrl && (
                   <img
                     src={previewUrl}
                     alt="Preview"
                     className="max-h-64 w-full object-contain rounded-md"
                   />
-                ) : (
+                )}
+                {selectedVideoUrl && (
                   <video
-                    src={previewUrl}
+                    src={`/videos/${selectedVideoUrl}`}
                     controls
                     className="max-h-64 w-full object-contain rounded-md"
                   />
@@ -528,27 +410,15 @@ const CreatePostModal = ({
                 </button>
               </div>
             )}
-            <input
-              type="file"
-              accept="image/*,video/*"
-              onChange={handleFileChange}
-              ref={fileInputRef}
-              className="mt-4"
-              hidden
-            />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="mt-2 w-full bg-gray-100 p-2 rounded-md flex items-center justify-center space-x-2"
-            >
-              <img src="/images/photo_video.png" alt="" className="size-6" />
-              <span>Add Photo/Video</span>
-            </button>
             <button
               type="submit"
-              disabled={isLoading || !content.trim()}
+              disabled={
+                isLoading ||
+                (!content.trim() && !imageFile && !selectedVideoUrl)
+              }
               className={`mt-4 w-full bg-blue-500 text-white p-2 rounded-md ${
-                isLoading || !content.trim()
+                isLoading ||
+                (!content.trim() && !imageFile && !selectedVideoUrl)
                   ? "opacity-50 cursor-not-allowed"
                   : "hover:bg-blue-600"
               }`}
@@ -562,87 +432,6 @@ const CreatePostModal = ({
   );
 };
 
-const Stories = () => {
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-
-  const storiesRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    checkScroll();
-    const storiesElement = storiesRef.current;
-    storiesElement?.addEventListener("scroll", checkScroll);
-    return () => storiesElement?.removeEventListener("scroll", checkScroll);
-  }, []);
-
-  const checkScroll = () => {
-    if (storiesRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = storiesRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
-    }
-  };
-
-  const storyWidth = 144;
-  const gap = 16;
-  const storiesPerView = 3;
-  const scrollDistance =
-    storiesPerView * storyWidth + (storiesPerView - 1) * gap;
-
-  const scrollLeft = () => {
-    if (storiesRef.current) {
-      storiesRef.current.scrollBy({
-        left: -scrollDistance,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  const scrollRight = () => {
-    if (storiesRef.current) {
-      storiesRef.current.scrollBy({
-        left: scrollDistance,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  return (
-    <div className="relative mb-4">
-      {canScrollLeft && (
-        <button
-          onClick={scrollLeft}
-          className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md"
-        >
-          <ChevronLeftIcon className="h-6 w-6 text-gray-800" />
-        </button>
-      )}
-      <div
-        ref={storiesRef}
-        className="flex flex-row gap-4 overflow-x-auto scrollbar-hidden snap-x snap-mandatory"
-      >
-        {Array.from({ length: 12 }).map((_, index) => (
-          <div
-            key={index}
-            className="w-36 h-48 border-2 border-gray-400 rounded-lg flex-shrink-0 snap-center bg-gray-200 flex items-center justify-center"
-          >
-            Story {index + 1}
-          </div>
-        ))}
-      </div>
-      {canScrollRight && (
-        <button
-          onClick={scrollRight}
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md"
-        >
-          <ChevronRightIcon className="h-6 w-6 text-gray-800" />
-        </button>
-      )}
-    </div>
-  );
-};
-
-// Header của Post
 const HeaderPost = ({ name, avatar, timestamp, status }: HeaderPostProps) => {
   return (
     <div className="flex items-center justify-between p-2">
@@ -692,6 +481,7 @@ const Post = ({
   imageUrl,
   imageContentType,
   likesCount,
+  videoUrl,
   commentsCount,
   isLiked,
   onLike,
@@ -864,7 +654,7 @@ const Post = ({
       />
       <div className="px-2">
         {content && <p className="text-black mb-3">{content}</p>}
-        {imageUrl && (
+        {imageUrl ? (
           <div className="flex justify-center">
             <img
               src={getImageSrc()}
@@ -877,7 +667,19 @@ const Post = ({
               }}
             />
           </div>
-        )}
+        ) : videoUrl ? (
+          <div className="flex justify-center">
+            <video
+              src={`${videoUrl}`}
+              controls
+              className="max-w-[500px] max-h-[500px] w-full h-auto object-contain rounded-md"
+              onError={(e) => {
+                console.error("Error loading video:", videoUrl);
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          </div>
+        ) : null}
       </div>
       <div className="px-3 pb-3 border-t border-gray-200">
         <div className="flex justify-between text-gray-500 text-sm py-2">
@@ -1005,7 +807,7 @@ const Middle = () => {
           "http://localhost:8080/api/posts/get-all-posts",
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              // Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           }
         );
@@ -1018,7 +820,7 @@ const Middle = () => {
               `http://localhost:8080/api/likes/post/${post.id}/status?userId=${currentUser.id}`,
               {
                 headers: {
-                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  // Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
               }
             );
@@ -1030,7 +832,7 @@ const Middle = () => {
               `http://localhost:8080/api/likes/post/${post.id}/count`,
               {
                 headers: {
-                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  // Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
               }
             );
@@ -1042,7 +844,7 @@ const Middle = () => {
               `http://localhost:8080/api/comments/post/${post.id}/count`,
               {
                 headers: {
-                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  // Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
               }
             );
@@ -1063,10 +865,9 @@ const Middle = () => {
                 avatarUrl: post.user.avatarUrl,
               },
               status: post.status,
-              videoUrl: post.videoUrl,
+              videoUrl: "/public/videos/" + post.videoUrl,
               likesCount,
               commentsCount,
-              sharesCount: 0,
               isLiked,
             };
           })
@@ -1107,8 +908,7 @@ const Middle = () => {
 
   return (
     <>
-      <YoursMind currentUser={currentUser} />
-      <Stories />
+      {currentUser && <YoursMind currentUser={currentUser} />}
       {posts.map((post) => (
         <Post
           key={post.id}
@@ -1119,6 +919,7 @@ const Middle = () => {
             dateStyle: "short",
             timeStyle: "short",
           })}
+          videoUrl={post.videoUrl}
           content={post.content}
           imageUrl={post.imageUrl}
           imageContentType={post.imageContentType}

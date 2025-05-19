@@ -26,8 +26,6 @@ export interface PostType {
   videoUrl?: string | null;
   likesCount: number;
   commentsCount: number;
-  sharesCount: number;
-  commentList: CommentType[];
   isLiked: boolean;
 }
 
@@ -48,12 +46,20 @@ export interface PostProps {
   content?: string | null;
   imageUrl?: string | null;
   imageContentType?: string | null;
+  videoUrl?: string | null;
   likesCount: number;
   commentsCount: number;
   isLiked: boolean;
   onLike: (id: number, newLikes: number, newIsLiked: boolean) => void;
   onCommentAdded: (id: number, newCommentsCount: number) => void;
   currentUser: User;
+}
+
+export interface PostModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onPostAdded: (newPost: PostProps) => void;
+  currentUser: User | null;
 }
 
 // Interface cho Comment

@@ -93,7 +93,10 @@ const LeftSideBar = () => {
                 {/* Icon từ sprite sheet */}
                 {item.isImage ? (
                   <img
-                    src={getImageSrc(item.image ?? "", item.ImageType ?? "")}
+                    src={
+                      getImageSrc(item.image ?? "", item.ImageType ?? "") ||
+                      "/images/avatar.png"
+                    }
                     alt={item.label}
                     className="h-[37px] w-[37px] rounded-full object-cover"
                   />
