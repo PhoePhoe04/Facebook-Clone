@@ -10,7 +10,7 @@ import ProfilePage from "./pages/ProfilePage/ProfilePage";
 import RegisterPage from "./pages/Login and Register/RegisterPage";
 import ProfileFriend from "./pages/ProfilePage/ProfileFriend";
 import ProfilePhoto from "./pages/ProfilePage/ProfilePhoto";
-import FriendsList from "./pages/FriendsPage/allFriend";
+import FriendsList from "./pages/FriendsPage/AllFriend";
 import AdminDashboard from "./pages/AdminPage/AdminPage";
 import ChatContainer from "./components/Chat/ChatContainer";
 import { ChatProvider } from "./contexts/ChatContext";
