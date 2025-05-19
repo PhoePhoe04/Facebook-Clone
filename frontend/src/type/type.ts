@@ -86,3 +86,15 @@ export interface CommentProps {
 export interface YoursMindProps {
   currentUser: User;
 }
+
+export interface CommentType {
+  id: number;
+  name: string;
+  avatar: string;
+  text: string;
+  timestamp: string;
+  isLiked: boolean;
+  likeCount: number;
+  commentList: CommentType[];
+  image?: string | null;
+}
