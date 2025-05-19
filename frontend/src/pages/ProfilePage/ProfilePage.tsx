@@ -18,21 +18,16 @@ const images = [
   "/images/dp2.png"
 ];
 
-const friends = [
-  { name: "Friend 1", img: "/images/dp1.png" },
-  { name: "Friend 2", img: "/images/dp2.png" },
-  { name: "Friend 3", img: "/images/dp3.png" },
-  { name: "Friend 4", img: "/images/dp4.png" },
-  { name: "Friend 5", img: "/images/dp1.png" },
-  { name: "Friend 6", img: "/images/dp2.png" },
-  { name: "Friend 7", img: "/images/dp3.png" },
-  { name: "Friend 8", img: "/images/dp4.png" },
-  { name: "Friend 9", img: "/images/dp1.png" },
-  { name: "Friend 10", img: "/images/dp2.png" }
-];
+interface Friend {
+  id: number;
+  requester: user;
+  receiver: user;
+  status: string;
+  createdAt: Date;
+}
 
 interface user {
-  id: string;
+  id: number;
   name: string;
   email: string;
   password: string;
@@ -51,7 +46,7 @@ const ProfilePage = () => {
   const [coverPreview, setCoverPreview] = useState("");
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [activeMain, setActiveMain] = useState("Bài viết");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [friends, setFriends] = useState<Friend[] | null>(null);
   // Ref cho thẻ canvas
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // Kích thước tối đa mong muốn cho ảnh avatar
@@ -71,16 +66,32 @@ const ProfilePage = () => {
   };
 
   useEffect(() => {
+    const fetchFriends = async () => {
+      if (userData) {
+        try {
+          const response = await fetch(`http://localhost:8080/api/friendships/userFriends/${userData.id}`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data: Friend[] = await response.json();
+          setFriends(data);
+        } catch (error) {
+          console.error("Lỗi khi tải danh sách bạn bè:", error);
+        }
+      }
+    };
+
+    fetchFriends();
+  }, [userData?.id]);
+
+  useEffect(() => {
     loadUserDataFromLocalStorage();
   }, []);
   const [userName, setUserName] = useState<string>("");
   const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
   const [selectedCoverFile, setSelectedCoverFile] = useState<File | null>(null);
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
-
-  const fetchUserData = async (userId: string) => {
+  const fetchUserData = async (userId: number) => {
     try {
       const response = await axios.get(`http://localhost:8080/api/users/${userId}`);
       if (response.status >= 200 && response.status < 300) {
@@ -194,26 +205,22 @@ const ProfilePage = () => {
   };
 
   // Lấy avatar
-    const getAvatarSrc = (): string => {
-      if(userData) {
+    const getAvatarSrc = (user: user): string => {
+      if(user) {
         // Check if base64 data (avatarImage) and content type are available from backend
-        if (userData.avatarImage && userData.avatarContentType) {
+        if (user.avatarImage && user.avatarContentType) {
             // Correctly format the data URL
-            return `data:${userData.avatarContentType};base64,${userData.avatarImage}`;
+            return `data:${user.avatarContentType};base64,${user.avatarImage}`;
         }
         // If no base64 data, check for a remote URL (less common with file uploads but kept for compatibility)
-        if (userData.avatarUrl) {
-            return userData.avatarUrl;
+        if (user.avatarUrl) {
+            return user.avatarUrl;
         }
       }
         // Fallback to a default placeholder image if no avatar data is available
         // Make sure you have a 'placeholder-avatar.png' in your public directory
         return 'placeholder-avatar.png';
     };
-
-  const handlePost = (postData: any) => {
-    console.log("Bài viết mới:", postData);
-  };
 
   const editProfile = async () => {
     const editProfileForm = new FormData();
@@ -271,7 +278,7 @@ const ProfilePage = () => {
                 <div className="flex items-end gap-4">
                   {/* Avatar */}
                   <div className="relative">
-                    <img src={getAvatarSrc()} alt="Avatar" className="w-[200px] h-[200px] rounded-full border-4 border-white shadow-lg object-cover"/>
+                    <img src={getAvatarSrc(userData!)} alt="Avatar" className="w-[200px] h-[200px] rounded-full border-4 border-white shadow-lg object-cover"/>
                     <label className="absolute bottom-2 right-2 bg-gray-200 p-1 rounded-full cursor-pointer hover:bg-gray-300">
                       <img src="/images/camera1.jpeg" alt="Chọn ảnh đại diện" className="h-5 w-5 object-contain"/>
                       <input type="file" className="hidden" onChange={handleAvatarChange} />
@@ -340,12 +347,12 @@ const ProfilePage = () => {
                     Xem tất cả bạn bè
                   </button>
                 </div>
-                <p className="text-gray-500">464 người bạn</p>
+                <p className="text-gray-500">{friends?.length} người bạn</p>
                 <div className="grid grid-cols-3 gap-2 mt-2">
-                  {friends.slice(0, 9).map((friend, index) => (
+                  {friends?.slice(0, 9).map((friend, index) => (
                     <div key={index} className="text-center">
-                      <img src={friend.img} className="w-full h-30 object-cover rounded-md" />
-                      <p className="text-xs font-semibold">{friend.name}</p>
+                      <img src={friend.requester.id === userData?.id ? getAvatarSrc(friend.receiver) || "/images/default-avatar.png" : getAvatarSrc(friend.requester) || "/images/default-avatar.png"} className="w-full h-30 object-cover rounded-md" />
+                      <p className="text-xs font-semibold">{friend.requester.id === userData?.id ? friend.receiver.name : friend.requester.name}</p>
                     </div>
                   ))}
                 </div>
@@ -365,7 +372,7 @@ const ProfilePage = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-semibold mb-1">Ảnh đại diện hiện tại</label>
-                        <img src={getAvatarSrc()} alt="Avatar Preview" className="w-24 h-24 rounded-full object-cover mb-2" />
+                        <img src={getAvatarSrc(userData!) || "/images/dp0.png"} alt="Avatar Preview" className="w-24 h-24 rounded-full object-cover mb-2" />
                         <input type="file" accept="image/*" className="w-full" onChange={handleAvatarChange} />
                       </div>
                       <div>
