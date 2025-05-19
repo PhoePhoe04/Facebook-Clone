@@ -18,7 +18,6 @@ const RegisterPage = () => {
       formData.append("email", email);
       formData.append("password", password);
       formData.append("status", "ACTIVE"); // hoặc lấy từ UI nếu có
-      formData.append("bio", ""); // hoặc cho phép người dùng nhập
 
       const response = await fetch("http://localhost:8080/api/users/register", {
         method: "POST",
