@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from 'react';
 import ProfileTabs from './ProfileTabs';
 import ProfilePost from './ProfilePost';
@@ -5,6 +6,7 @@ import ProfileFriend from './ProfileFriend';
 import ProfilePhoto from './ProfilePhoto';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom'; // Thêm useParams và useNavigate
+
 
 const images = [
   '/images/dp1.png',
@@ -18,6 +20,7 @@ const images = [
   '/images/dp1.png',
   '/images/dp2.png',
 ];
+
 
 const friends = [
   { name: 'Friend 1', img: '/images/dp1.png' },
@@ -44,7 +47,9 @@ interface user {
   bio: string;
   status: string;
   avatarUrl: string;
-}
+};
+
+
 
 const ProfilePage = () => {
   const { userId } = useParams<{ userId: string }>(); // Lấy userId từ URL
@@ -52,6 +57,7 @@ const ProfilePage = () => {
   const [avatarPreview, setAvatarPreview] = useState('');
   const [coverPreview, setCoverPreview] = useState('');
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
+
   const [activeMain, setActiveMain] = useState('Bài viết');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -170,6 +176,7 @@ const ProfilePage = () => {
         }
       } catch (error) {
         console.error('Error during image processing:', error);
+
       }
 
       const newAvatar = URL.createObjectURL(file);
@@ -229,6 +236,57 @@ const ProfilePage = () => {
     }
   };
 
+  // Lấy avatar
+    const getAvatarSrc = (user: user): string => {
+      if(user) {
+        // Check if base64 data (avatarImage) and content type are available from backend
+        if (user.avatarImage && user.avatarContentType) {
+            // Correctly format the data URL
+            return `data:${user.avatarContentType};base64,${user.avatarImage}`;
+        }
+        // If no base64 data, check for a remote URL (less common with file uploads but kept for compatibility)
+        if (user.avatarUrl) {
+            return user.avatarUrl;
+        }
+      }
+        // Fallback to a default placeholder image if no avatar data is available
+        // Make sure you have a 'placeholder-avatar.png' in your public directory
+        return 'placeholder-avatar.png';
+    };
+
+  const editProfile = async () => {
+    const editProfileForm = new FormData();
+    if(userData) {
+      console.log(selectedAvatarFile);
+      if (userName.trim() !== "") {
+        editProfileForm.append('name', userName);
+      } else {
+        editProfileForm.append('name', userData.name); // fallback
+      }
+
+      if(selectedAvatarFile) {
+        editProfileForm.append('avatarFile', selectedAvatarFile)
+      }
+      if(selectedCoverFile) {
+        editProfileForm.append('coverFile', selectedCoverFile);
+      }
+      editProfileForm.append('email', userData.email);
+      editProfileForm.append('status', userData.status);
+
+      try {
+        const response = await axios.put(`http://localhost:8080/api/users/edit-user/${userData.id}`, editProfileForm);
+        if(response.status >= 200 && response.status < 300) {
+          fetchUserData(userData.id);
+          setIsEditFormOpen(false);
+        }
+      } catch(err) {
+        console.log(err);
+      }
+    } else {
+      console.log("Lỗi chưa đăng nhập để có thông tin người dùng đăng nhập hiện tại");
+    }
+  };
+  
   return (
     <div className="flex flex-col min-h-screen bg-white-fff">
       {/* Header */}
@@ -276,6 +334,7 @@ const ProfilePage = () => {
               <div className="flex items-end justify-between mt-[-110px] px-6">
                 <div className="flex items-end gap-4">
                   <div className="relative">
+
                     <img
                       src={getAvatarSrc()}
                       alt="Avatar"
@@ -362,12 +421,12 @@ const ProfilePage = () => {
                     Xem tất cả bạn bè
                   </button>
                 </div>
-                <p className="text-gray-500">464 người bạn</p>
+                <p className="text-gray-500">{friends?.length} người bạn</p>
                 <div className="grid grid-cols-3 gap-2 mt-2">
-                  {friends.slice(0, 9).map((friend, index) => (
+                  {friends?.slice(0, 9).map((friend, index) => (
                     <div key={index} className="text-center">
-                      <img src={friend.img} className="w-full h-30 object-cover rounded-md" />
-                      <p className="text-xs font-semibold">{friend.name}</p>
+                      <img src={friend.requester.id === userData?.id ? getAvatarSrc(friend.receiver) || "/images/default-avatar.png" : getAvatarSrc(friend.requester) || "/images/default-avatar.png"} className="w-full h-30 object-cover rounded-md" />
+                      <p className="text-xs font-semibold">{friend.requester.id === userData?.id ? friend.receiver.name : friend.requester.name}</p>
                     </div>
                   ))}
                 </div>
@@ -434,7 +493,6 @@ const ProfilePage = () => {
         )}
         <div className="w-1/5"></div>
       </div>
-
       <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
     </div>
   );

@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../contexts/AuthContext';
+
 // import { getUserProfile } from '../../services/user.service';
 // import { getUserPosts } from '../../services/post.service';
 // import { getMutualFriends, getFriendshipStatus } from '../../services/friend.service';
 // import PostCard from '../../components/Post/PostCard';
+
 import FriendshipButton from '../../components/Friend/FriendshipButton';
 import { Camera, MapPin, Briefcase, GraduationCap, Heart } from 'lucide-react';
 
