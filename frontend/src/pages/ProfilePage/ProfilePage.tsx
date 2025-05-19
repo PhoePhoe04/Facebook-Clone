@@ -114,12 +114,6 @@ const ProfilePage = () => {
                 </div>
                 {/* Các nút hành động */}
                 <div className="flex gap-3">
-                  {/* Nút nhắn tin */}
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 shadow-md hover:bg-blue-700 transition font-semibold">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
-                    </svg><span>Nhắn tin</span>
-                  </button>
                   {/* Nút chỉnh sửa */}
                   <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg border border-gray-300 flex items-center gap-2 shadow-md hover:bg-gray-200 transition font-semibold" 
                     onClick={() => setIsEditFormOpen(true)}>
@@ -194,20 +188,20 @@ const ProfilePage = () => {
                   <input type="text" placeholder="Bạn đang nghĩ gì?" onClick={openModal}
                     className="flex-1 p-2 border border-gray-300 rounded-full focus:outline-none cursor-pointer" readOnly/>
                 </div>
-                <div className="flex justify-around pt-2 mt-2 border-t border-gray-200">
-                  <div
-                    onClick={openModal}
-                    className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md cursor-pointer py-2"
-                  >
-                    <img src="/images/photo_video.png" alt="Photo/Video" className="size-7" />
-                    <label className="text-gray-600">Ảnh/Video</label>
+                <div className="flex justify-around pt-2 mt-3 border-t border-gray-200 py-2">
+                  <div className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md">
+                    <img src="/images/live_video.png" alt="" className="size-7" />
+                    <label>Live video</label>
                   </div>
-                  <div
+                  <button
                     onClick={openModal}
-                    className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md cursor-pointer py-2"
-                  >
-                    <img src="/images/live_video.png" alt="Sự kiện" className="size-7" />
-                    <label className="text-gray-600">Sự kiện</label>
+                    className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md">
+                    <img src="/images/photo_video.png" alt="" className="size-7" />
+                    <label>Photo/video</label>
+                  </button>
+                  <div className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md">
+                    <img src="/images/feeling_activity.png" alt="" className="size-7" />
+                    <label>Feeling/activity</label>
                   </div>
                 </div>
               </div>
