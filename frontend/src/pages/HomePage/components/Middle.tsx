@@ -63,86 +63,7 @@ const YoursMind = ({ currentUser }: YoursMindProps) => {
   );
 };
 
-//   const [canScrollLeft, setCanScrollLeft] = useState(false);
-//   const [canScrollRight, setCanScrollRight] = useState(true);
-
-//   const storiesRef = useRef<HTMLDivElement | null>(null);
-
-//   useEffect(() => {
-//     checkScroll();
-//     const storiesElement = storiesRef.current;
-//     storiesElement?.addEventListener("scroll", checkScroll);
-//     return () => storiesElement?.removeEventListener("scroll", checkScroll);
-//   }, []);
-
-//   const checkScroll = () => {
-//     if (storiesRef.current) {
-//       const { scrollLeft, scrollWidth, clientWidth } = storiesRef.current;
-//       setCanScrollLeft(scrollLeft > 0);
-//       setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
-//     }
-//   };
-
-//   const storyWidth = 144;
-//   const gap = 16;
-//   const storiesPerView = 3;
-//   const scrollDistance =
-//     storiesPerView * storyWidth + (storiesPerView - 1) * gap;
-
-//   const scrollLeft = () => {
-//     if (storiesRef.current) {
-//       storiesRef.current.scrollBy({
-//         left: -scrollDistance,
-//         behavior: "smooth",
-//       });
-//     }
-//   };
-
-//   const scrollRight = () => {
-//     if (storiesRef.current) {
-//       storiesRef.current.scrollBy({
-//         left: scrollDistance,
-//         behavior: "smooth",
-//       });
-//     }
-//   };
-
-//   return (
-//     <div className="relative mb-4">
-//       {canScrollLeft && (
-//         <button
-//           onClick={scrollLeft}
-//           className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md"
-//         >
-//           <ChevronLeftIcon className="h-6 w-6 text-gray-800" />
-//         </button>
-//       )}
-//       <div
-//         ref={storiesRef}
-//         className="flex flex-row gap-4 overflow-x-auto scrollbar-hidden snap-x snap-mandatory"
-//       >
-//         {Array.from({ length: 12 }).map((_, index) => (
-//           <div
-//             key={index}
-//             className="w-36 h-48 border-2 border-gray-400 rounded-lg flex-shrink-0 snap-center bg-gray-200 flex items-center justify-center"
-//           >
-//             Story {index + 1}
-//           </div>
-//         ))}
-//       </div>
-//       {canScrollRight && (
-//         <button
-//           onClick={scrollRight}
-//           className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md"
-//         >
-//           <ChevronRightIcon className="h-6 w-6 text-gray-800" />
-//         </button>
-//       )}
-//     </div>
-//   );
-// };
-
-// Header của Post
+// Create Post Modal
 const CreatePostModal = ({
   isOpen,
   onClose,
@@ -432,6 +353,7 @@ const CreatePostModal = ({
   );
 };
 
+// Header của Post
 const HeaderPost = ({ name, avatar, timestamp, status }: HeaderPostProps) => {
   return (
     <div className="flex items-center justify-between p-2">

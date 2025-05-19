@@ -1,223 +1,222 @@
-import { HandThumbUpIcon, ChatBubbleOvalLeftIcon, ShareIcon, EllipsisHorizontalIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useState, useCallback } from "react";
-import EmojiPicker from "emoji-picker-react";
-import { EmojiClickData } from "emoji-picker-react";
-import PostModal from "./PostModal";
+import { useState, useEffect, useRef } from "react";
+import { PostProps, User, CommentType } from "../../type/type";
+import {
+  HandThumbUpIcon,
+  ChatBubbleOvalLeftIcon,
+  GlobeAltIcon,
+  EllipsisHorizontalIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 
-interface CommentType {
-  id: number;
+interface HeaderPostProps {
   name: string;
-  avatar: string;
-  text: string;
+  avatar?: string | null;
   timestamp: string;
-  isLiked: boolean;
-  likeCount: number;
-  commentList: CommentType[];
-  image?: string | null;
+  status?: string;
 }
 
-interface PostType {
-  id: number;
-  name: string;
-  avatar: string;
-  timestamp: string;
-  content: string;
-  image: string | null;
-  likes: number;
-  comments: number;
-  shares: number;
-  isLiked: boolean;
-  commentList: CommentType[];
-  status?: 'public' | 'friends' | 'private';
-}
-
-const ProfilePost = () => {
-  const [posts, setPosts] = useState<PostType[]>([
-    {
-      id: 1,
-      name: "Tên người dùng",
-      avatar: "/images/dp5.png",
-      timestamp: "2 giờ trước",
-      content: "Hôm nay là một ngày đẹp trời!",
-      image: "/images/pic1.jpeg",
-      likes: 12,
-      comments: 5,
-      shares: 2,
-      isLiked: false,
-      commentList: [],
-      status: 'public'
-    },
-    {
-      id: 2,
-      name: "Lac",
-      avatar: "/images/avatar.png",
-      timestamp: "4 giờ trước",
-      content: "Cảnh này thật tuyệt vời!",
-      image: "/images/pic2.jpeg",
-      likes: 30,
-      comments: 10,
-      shares: 4,
-      isLiked: true,
-      commentList: [],
-      status: 'public'
-    },
-  ]);
-  
-  const [showModal, setShowModal] = useState(false);
-  const currentUser = {
-    name: "Nguyễn Văn A",
-    avatar: "/images/dp1.png"
-  };
-
-  const handleLikeComment = useCallback(
-    (postId: number, commentId: number) => {
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === postId
-            ? {
-                ...post,
-                commentList: post.commentList.map((comment) =>
-                  comment.id === commentId
-                    ? {
-                        ...comment,
-                        isLiked: !comment.isLiked,
-                        likeCount: comment.isLiked ? comment.likeCount - 1 : comment.likeCount + 1,
-                      }
-                    : comment
-                ),
-              }
-            : post
-        )
-      );
-    },
-    []
-  );
-
-  const handleLike = useCallback(
-    (id: number) => {
-      setPosts((prev) =>
-        prev.map((post) =>
-          post.id === id
-            ? {
-                ...post,
-                isLiked: !post.isLiked,
-                likes: post.isLiked ? post.likes - 1 : post.likes + 1,
-              }
-            : post
-        )
-      );
-    },
-    []
-  );
-  
-  const addPost = useCallback((postData: {
-    content: string;
-    image: string | null;
-    status: string;
-  }) => {
-    const newPost: PostType = {
-      id: Date.now(),
-      name: currentUser.name,
-      avatar: currentUser.avatar,
-      timestamp: "Vừa xong",
-      content: postData.content,
-      image: postData.image,
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      isLiked: false,
-      commentList: [],
-      status: postData.status as 'public' | 'friends' | 'private'
-    };
-    
-    setPosts(prevPosts => [newPost, ...prevPosts]);
-  }, [currentUser]);
-
-  const handleDeletePost = useCallback((postId: number) => {
-    setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
-  }, []);
-
-  const handleAddComment = (postId: number, text: string, image?: string | null) => {
-    const newComment: CommentType = {
-      id: Date.now(),
-      name: currentUser.name,
-      avatar: currentUser.avatar,
-      text,
-      isLiked: false,
-      likeCount: 0,
-      commentList: [],
-      timestamp: "Vừa xong",
-      image: image ?? undefined,
-    };
-
-    setPosts((prev) =>
-      prev.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              comments: post.comments + 1,
-              commentList: [...post.commentList, newComment],
-            }
-          : post
-      )
-    );
-  };
-
+const HeaderPost = ({ name, avatar, timestamp, status }: HeaderPostProps) => {
   return (
-    <div>
-      {/* Phần tạo bài viết mới */}
-      <div className="flex flex-col shadow-md mb-4 bg-white p-4 rounded-md space-y-2">
-        <div className="flex space-x-2 border-b border-gray-200 pb-2">
+    <div className="flex items-center justify-between p-2">
+      <div className="flex items-center space-x-3">
+        <div className="relative">
           <img
-            src={currentUser.avatar}
-            alt="User avatar"
-            className="rounded-full w-10 h-10"
-          />
-          <input
-            type="text"
-            placeholder="Bạn đang nghĩ gì?"
-            className="bg-gray-100 w-full px-4 py-2 rounded-full hover:bg-gray-200 cursor-pointer focus:outline-none"
-            onClick={() => setShowModal(true)}
-            readOnly
+            src={avatar || "/images/avatar.png"}
+            alt={name}
+            className="h-10 w-10 rounded-full border-2 border-white"
           />
         </div>
-        <div className="flex justify-between">
-          <div className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md py-1 cursor-pointer">
-            <img src="/images/live_video.png" alt="" className="size-6" />
-            <span className="text-sm text-gray-600">Video trực tiếp</span>
+        <div>
+          <div className="flex items-center space-x-1">
+            <span className="font-semibold text-black">{name}</span>
           </div>
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md py-1 cursor-pointer"
-          >
-            <img src="/images/photo_video.png" alt="" className="size-6" />
-            <span className="text-sm text-gray-600">Ảnh/video</span>
-          </button>
-          <div className="flex flex-1 space-x-2 items-center justify-center hover:bg-gray-200 rounded-md py-1 cursor-pointer">
-            <img src="/images/feeling_activity.png" alt="" className="size-6" />
-            <span className="text-sm text-gray-600">Cảm xúc/hoạt động</span>
+          <div className="flex items-center space-x-1 text-gray-500 text-sm">
+            <span>{timestamp}</span>
+            {status && (
+              <>
+                <span>·</span>
+                <span>{status}</span>
+                <GlobeAltIcon className="h-4 w-4" />
+              </>
+            )}
           </div>
         </div>
       </div>
+      <div className="flex items-center space-x-2">
+        <button className="text-gray-500 hover:bg-gray-200 rounded-full p-1">
+          <EllipsisHorizontalIcon className="h-6 w-6" />
+        </button>
+        <button className="text-gray-500 hover:bg-gray-200 rounded-full p-1">
+          <XMarkIcon className="h-6 w-6" />
+        </button>
+      </div>
+    </div>
+  );
+};
 
-      {/* Modal tạo bài viết */}
-      <PostModal 
-        isOpen={showModal} 
-        onClose={() => setShowModal(false)} 
-        onPost={addPost} 
-        currentUser={currentUser}
+const Comment = ({ comment }: { comment: CommentType }) => {
+  return (
+    <div className="flex space-x-2 mt-2">
+      <img
+        src={comment.user.avatarUrl || "/images/avatar.png"}
+        alt={comment.user.name}
+        className="h-8 w-8 rounded-full"
       />
+      <div className="flex-1 bg-gray-100 rounded-lg p-2">
+        <div className="flex justify-between">
+          <span className="font-semibold text-sm">{comment.user.name}</span>
+          <span className="text-xs text-gray-500">
+            {new Date(comment.createdAt).toLocaleString("vi-VN", {
+              dateStyle: "short",
+              timeStyle: "short",
+            })}
+          </span>
+        </div>
+        <p className="text-sm">{comment.content}</p>
+      </div>
+    </div>
+  );
+};
 
-      {/* Danh sách bài viết */}
+const ProfilePost = () => {
+  const [posts, setPosts] = useState<PostProps[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+
+      // Bước 1: Lấy currentUser từ localStorage
+      const userData = localStorage.getItem("currentUser");
+      console.log("User data from localStorage:", userData); // Debug
+      let user: User | null = null;
+      if (userData) {
+        try {
+          user = JSON.parse(userData);
+          console.log("Parsed currentUser:", user); // Debug
+          setCurrentUser(user);
+        } catch (error) {
+          console.error("Error parsing user from localStorage:", error);
+          localStorage.removeItem("currentUser");
+          setError("Lỗi khi lấy thông tin người dùng");
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Bước 2: Nếu không có user, báo lỗi
+      if (!user) {
+        setError("Vui lòng đăng nhập để xem bài viết");
+        setIsLoading(false);
+        return;
+      }
+
+      // Bước 3: Fetch posts
+      try {
+        console.log("Fetching posts with userId:", user.id); // Debug
+        const response = await fetch(
+          `http://localhost:8080/api/posts/user/?userId=${user.id}`,
+          {
+            method: "GET",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch posts: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const fetchedPosts: PostProps[] = await Promise.all(
+          data.map(async (post: any) => {
+            // Lấy trạng thái like
+            const likeStatusResponse = await fetch(
+              `http://localhost:8080/api/likes/post/${post.id}/status?userId=${user.id}`
+            );
+            const { value: isLiked } = likeStatusResponse.ok
+              ? await likeStatusResponse.json()
+              : { value: false };
+
+            // Lấy số likes
+            const likesCountResponse = await fetch(
+              `http://localhost:8080/api/likes/post/${post.id}/count`
+            );
+            const { value: likesCount } = likesCountResponse.ok
+              ? await likesCountResponse.json()
+              : { value: 0 };
+
+            // Lấy số comments
+            const commentsCountResponse = await fetch(
+              `http://localhost:8080/api/comments/post/${post.id}/count`
+            );
+            const { value: commentsCount } = commentsCountResponse.ok
+              ? await commentsCountResponse.json()
+              : { value: 0 };
+
+            return {
+              id: post.id,
+              name: post.user.name,
+              avatar: post.user.avatarUrl || "/images/avatar.png",
+              timestamp: new Date(post.createdAt).toLocaleString("vi-VN", {
+                dateStyle: "short",
+                timeStyle: "short",
+              }),
+              content: post.content || null,
+              imageUrl: post.imageUrl || null,
+              imageContentType: post.imageContentType || null,
+              videoUrl: post.videoUrl
+                ? `/public/videos/${post.videoUrl}`
+                : null,
+              likesCount,
+              commentsCount,
+              isLiked,
+              onLike: (id: number, newLikes: number, newIsLiked: boolean) => {
+                setPosts((prev) =>
+                  prev.map((p) =>
+                    p.id === id
+                      ? { ...p, likesCount: newLikes, isLiked: newIsLiked }
+                      : p
+                  )
+                );
+              },
+              onCommentAdded: (id: number, newCommentsCount: number) => {
+                setPosts((prev) =>
+                  prev.map((p) =>
+                    p.id === id ? { ...p, commentsCount: newCommentsCount } : p
+                  )
+                );
+              },
+              currentUser: user,
+              comments: [], // Comments sẽ được fetch khi nhấn nút Comment
+            };
+          })
+        );
+
+        setPosts(fetchedPosts);
+      } catch (err: any) {
+        console.error("Error fetching posts:", err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  if (error) {
+    return <div className="text-center p-4 text-red-500">Lỗi: {error}</div>;
+  }
+
+  if (isLoading) {
+    return <div className="text-center p-4">Đang tải bài viết...</div>;
+  }
+
+  return (
+    <div>
       {posts.map((post) => (
-        <Post
-          key={post.id}
-          post={post}
-          onLike={handleLike}
-          onAddComment={handleAddComment}
-          onLikeComment={handleLikeComment}
-          onDelete={handleDeletePost}
-        />
+        <Post key={post.id} post={post} currentUser={currentUser!} />
       ))}
     </div>
   );
@@ -225,247 +224,253 @@ const ProfilePost = () => {
 
 const Post = ({
   post,
-  onLike,
-  onAddComment,
-  onLikeComment,
-  onDelete,
+  currentUser,
 }: {
-  post: PostType;
-  onLike: (id: number) => void;
-  onAddComment: (postId: number, text: string, image?: string | null) => void;
-  onLikeComment: (postId: number, commentId: number) => void;
-  onDelete: (postId: number) => void;
+  post: PostProps;
+  currentUser: User;
 }) => {
-  const [commentText, setCommentText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [showComments, setShowComments] = useState(false);
-  const [commentImage, setCommentImage] = useState<string | null>(null);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [comments, setComments] = useState<CommentType[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const commentInputRef = useRef<HTMLInputElement>(null);
 
-  const handleEmojiClick = (emojiData: EmojiClickData) => {
-    setCommentText((prev) => prev + emojiData.emoji);
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setCommentImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  const fetchComments = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/comments/post/${post.id}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch comments");
+      const data = await response.json();
+      const mappedComments: CommentType[] = data.map((comment: any) => ({
+        id: comment.id,
+        content: comment.content,
+        createdAt: comment.createdAt,
+        user: {
+          id: comment.user.id,
+          name: comment.user.name,
+          avatarUrl: comment.user.avatarUrl,
+        },
+        post: { id: comment.post.id },
+      }));
+      setComments(mappedComments);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
     }
   };
 
-  const {
-    id,
-    name,
-    avatar,
-    timestamp,
-    content,
-    image,
-    likes,
-    comments,
-    shares,
-    isLiked,
-    status
-  } = post;
+  const handleLike = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("http://localhost:8080/api/likes", {
+        method: post.isLiked ? "DELETE" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: currentUser.id, postId: post.id }),
+      });
+      if (!response.ok) throw new Error("Failed to update like");
+
+      const countResponse = await fetch(
+        `http://localhost:8080/api/likes/post/${post.id}/count`
+      );
+      if (!countResponse.ok) throw new Error("Failed to fetch likes count");
+      const { value: newLikes } = await countResponse.json();
+
+      post.onLike(post.id, newLikes, !post.isLiked);
+    } catch (error) {
+      console.error("Error handling like:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch("http://localhost:8080/api/comments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: newComment,
+          postId: post.id,
+          userId: currentUser.id,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Failed to add comment: ${response.status} - ${errorText}`
+        );
+      }
+
+      const countResponse = await fetch(
+        `http://localhost:8080/api/comments/post/${post.id}/count`
+      );
+      if (!countResponse.ok) {
+        throw new Error("Failed to fetch comments count");
+      }
+      const { value: newCommentsCount } = await countResponse.json();
+
+      const newCommentObj: CommentType = {
+        id: Date.now(), // ID tạm, lý tưởng nên lấy từ response
+        content: newComment,
+        createdAt: new Date().toISOString(),
+        user: {
+          id: currentUser.id,
+          name: currentUser.name,
+          avatarUrl: currentUser.avatarUrl,
+        },
+        post: { id: post.id },
+      };
+
+      setComments([...comments, newCommentObj]);
+      setNewComment("");
+      post.onCommentAdded(post.id, newCommentsCount);
+    } catch (err: any) {
+      console.error("Error adding comment:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCommentClick = () => {
+    setShowComments((prev) => {
+      const newState = !prev;
+      if (newState) {
+        setTimeout(() => commentInputRef.current?.focus(), 0);
+        fetchComments();
+      } else {
+        setNewComment("");
+        fetchComments();
+      }
+      return newState;
+    });
+  };
+
+  const getImageSrc = () => {
+    if (!post.imageUrl) return undefined;
+    if (post.imageUrl.startsWith("data:image/")) {
+      return post.imageUrl;
+    }
+    const mimeType = post.imageContentType || "image/jpeg";
+    return `data:${mimeType};base64,${post.imageUrl}`;
+  };
 
   return (
     <div className="rounded-md bg-white shadow-md mb-4">
-      <div className="flex justify-between items-center p-3">
-        <div className="flex items-center">
-          <img src={avatar} alt="Avatar" className="w-10 h-10 rounded-full mr-2" />
-          <div>
-            <p className="text-black font-semibold">{name}</p>
-            <p className="text-gray-500 text-xs">
-              {timestamp}
-              {status === 'private' && ' · Chỉ mình tôi'}
-              {status === 'friends' && ' · Bạn bè'}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <button className="text-gray-500 hover:bg-gray-200 rounded-full p-1">
-            <EllipsisHorizontalIcon className="h-6 w-6" />
-          </button>
-          <button className="text-gray-500 hover:bg-gray-200 rounded-full p-1" onClick={() => onDelete(post.id)} >
-            <XMarkIcon className="h-6 w-6" />
-          </button>
-        </div>
-      </div>
-      
+      <HeaderPost
+        name={post.name}
+        avatar={post.avatar}
+        timestamp={post.timestamp}
+        status={undefined}
+      />
       <div className="px-2">
-        <p className="text-black mb-3 px-2">{content}</p>
-        {image && (
+        {post.content && <p className="text-black mb-3">{post.content}</p>}
+        {post.imageUrl ? (
           <div className="flex justify-center">
             <img
-              src={image}
+              src={getImageSrc()}
               alt="Post Image"
-              className="max-w-[500px] max-h-[500px] w-auto h-auto object-contain rounded-md mx-auto"
+              className="max-w-[500px] max-h-[500px] w-full h-auto object-contain rounded-md"
+              loading="lazy"
+              onError={(e) => {
+                console.error("Error loading image:", post.imageUrl);
+                e.currentTarget.style.display = "none";
+              }}
             />
           </div>
-        )}
+        ) : post.videoUrl ? (
+          <div className="flex justify-center">
+            <video
+              src={post.videoUrl}
+              controls
+              className="max-w-[500px] max-h-[500px] w-full h-auto object-contain rounded-md"
+              onError={(e) => {
+                console.error("Error loading video:", post.videoUrl);
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          </div>
+        ) : null}
       </div>
-      
-      <div className="px-3 pb-3">
+      <div className="px-3 pb-3 border-t border-gray-200">
         <div className="flex justify-between text-gray-500 text-sm py-2">
           <div className="flex items-center space-x-1">
-            <span className="text-blue-500">👍</span>
-            <span>{likes.toLocaleString()}</span>
+            <span className="text-blue-500">😂</span>
+            <span>{post.likesCount.toLocaleString()}</span>
           </div>
           <div className="flex space-x-2">
-            <span>{comments} comments</span>
-            <span>{shares} shares</span>
+            <span>{post.commentsCount} comments</span>
           </div>
         </div>
-        
         <div className="flex justify-between border-t border-gray-200 pt-2">
           <button
-            onClick={() => onLike(id)}
+            onClick={handleLike}
+            disabled={isLoading}
             className={`flex flex-1 items-center justify-center space-x-1 px-4 py-2 rounded-md hover:bg-gray-100 ${
-              isLiked ? "text-blue-500" : "text-gray-500"
-            }`}
+              post.isLiked ? "text-blue-500" : "text-gray-500"
+            } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             <HandThumbUpIcon className="h-5 w-5" />
             <span>Like</span>
           </button>
           <button
-            onClick={() => setShowComments(!showComments)}
-            className="flex flex-1 items-center justify-center space-x-1 px-4 py-2 rounded-md hover:bg-gray-100 text-gray-500">
+            onClick={handleCommentClick}
+            className="flex flex-1 items-center justify-center space-x-1 px-4 py-2 rounded-md hover:bg-gray-100 text-gray-500"
+          >
             <ChatBubbleOvalLeftIcon className="h-5 w-5" />
             <span>Comment</span>
           </button>
-          <button className="flex flex-1 items-center justify-center space-x-1 px-4 py-2 rounded-md hover:bg-gray-100 text-gray-500">
-            <ShareIcon className="h-5 w-5" />
-            <span>Share</span>
-          </button>
         </div>
-      </div>
-      
-      {showComments && (
-        <div className="px-4 py-2">
-          <div className="flex flex-col gap-2 mb-3">
-            <div className="flex items-center relative w-full">
-              <img src={avatar} alt="avatar" className="w-8 h-8 rounded-full mr-2" />
+        {showComments && (
+          <div className="mt-2 border-t border-gray-200 pt-2">
+            {comments.length > 0 ? (
+              comments.map((comment) => (
+                <Comment key={comment.id} comment={comment} />
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">No comments yet.</p>
+            )}
+            <form
+              onSubmit={handleCommentSubmit}
+              className="flex space-x-2 mt-2"
+            >
+              <img
+                src={currentUser.avatarUrl || "/images/avatar.png"}
+                alt={currentUser.name}
+                className="h-8 w-8 rounded-full"
+              />
               <input
+                ref={commentInputRef}
                 type="text"
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && (commentText.trim() !== "" || commentImage)) {
-                    onAddComment(post.id, commentText.trim(), commentImage);
-                    setCommentText("");
-                    setCommentImage(null);
-                  }
-                }}
-                placeholder="Viết bình luận..."
-                className="flex-1 border border-gray-300 rounded-full px-4 py-2 pr-10 text-base focus:outline-none"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Write a comment..."
+                className="flex-1 p-2 rounded-full bg-gray-100 border-none focus:ring-2 focus:ring-blue-500"
+                disabled={isLoading}
               />
-              
-              <label htmlFor={`file-input-${post.id}`} className="absolute right-3 cursor-pointer">
-                <div className="flex items-center gap-2 relative">
-                  <button
-                    type="button"
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    className="text-gray-500 hover:text-blue-500 flex items-center justify-center"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M14.828 14.828a4 4 0 01-5.656 0M9.172 9.172a4 4 0 015.656 0M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  </button>
-
-                  {showEmojiPicker && (
-                    <div className="absolute bottom-full left-0 mb-1 z-50">
-                      <EmojiPicker onEmojiClick={handleEmojiClick} />
-                    </div>
-                  )}
-
-                  <label
-                    htmlFor={`file-input-${post.id}`}
-                    className="cursor-pointer flex items-center justify-center"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-5 h-5 text-gray-500 hover:text-blue-500"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M3 16.5V6.75A2.25 2.25 0 015.25 4.5h13.5A2.25 2.25 0 0121 6.75v10.5a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 16.5zm0 0l5.25-5.25a.75.75 0 011.06 0L15 16.5m0 0l2.25-2.25a.75.75 0 011.06 0L21 16.5"
-                      />
-                    </svg>
-                  </label>
-                </div>
-              </label>
-              <input
-                id={`file-input-${post.id}`}
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-            </div>
-            
-            <div className="flex items-center space-x-2 mx-6">
-              {commentImage && (
-                <img
-                  src={commentImage}
-                  alt="Preview"
-                  className="max-w-[200px] max-h-[200px] object-cover rounded-md"
-                />
-              )}
-            </div>
+              <button
+                type="submit"
+                disabled={isLoading || !newComment.trim()}
+                className={`text-blue-500 font-semibold ${
+                  isLoading || !newComment.trim()
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
+              >
+                Post
+              </button>
+            </form>
           </div>
-
-          {post.commentList.map((cmt) => (
-            <div key={cmt.id} className="flex items-start space-x-2 mb-2">
-              <img src={cmt.avatar} alt="avatar" className="w-8 h-8 rounded-full" />
-              <div className="bg-gray-100 rounded-lg px-3 py-2 text-sm max-w-[80%]">
-                <p className="font-semibold text-black">{cmt.name}</p>
-                <p>{cmt.text}</p>
-
-                {cmt.image && (
-                  <img
-                    src={cmt.image}
-                    alt="comment"
-                    className="mt-2 max-w-[400px] max-h-[400px] rounded-md"
-                  />
-                )}
-
-                <div className="text-xs text-gray-500 mt-1 flex space-x-3 items-center">
-                  <span>{cmt.timestamp}</span>
-                  <button 
-                    className="hover:underline cursor-pointer" 
-                    onClick={() => onLikeComment(post.id, cmt.id)}
-                  >
-                    Thích
-                  </button>
-                  <div className="flex items-center space-x-1">
-                    <span role="img" aria-label="like">👍</span>
-                    <span>{cmt.likeCount}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
