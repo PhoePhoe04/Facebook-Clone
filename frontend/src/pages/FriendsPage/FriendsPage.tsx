@@ -20,29 +20,29 @@ const FriendsPage = () => {
 
   const friendRequests = [
     { image: "/images/avtfr.jpg", name: "Nghĩa Hà" },
-    { image: "/images/avatar.png", name: "Dái bò" },
+    { image: "/images/avatar.png", name: "Hồ Nam" },
     { image: "/images/avatar2.jpg", name: "Hoàng Nam" },
-    { image: "/images/avatar3.webp", name: "Lỏ c" },
+    { image: "/images/avatar3.webp", name: "Dương Bá" },
     { image: "/images/avtfr.jpg", name: "Nghĩa Hà" },
-    { image: "/images/avatar.png", name: "Dái Bò" },
+    { image: "/images/avatar.png", name: "Hồ Nam" },
     { image: "/images/avatar2.jpg", name: "Hoàng Nam" },
-    { image: "/images/avatar3.webp", name: "Lỏ c" },
+    { image: "/images/avatar3.webp", name: "Dương Bá" },
     { image: "/images/avtfr.jpg", name: "Nghĩa Hà" },
-    { image: "/images/avatar.png", name: "Dái Bò" },
+    { image: "/images/avatar.png", name: "Hồ Nam" },
     { image: "/images/avatar2.jpg", name: "Hoàng Nam" },
-    { image: "/images/avatar3.webp", name: "Lỏ c" },
+    { image: "/images/avatar3.webp", name: "Dương Bá" },
     { image: "/images/avtfr.jpg", name: "Nghĩa Hà" },
-    { image: "/images/avatar.png", name: "Dái Bò" },
+    { image: "/images/avatar.png", name: "Hồ Nam" },
     { image: "/images/avatar2.jpg", name: "Hoàng Nam" },
-    { image: "/images/avatar3.webp", name: "Lỏ c" },
+    { image: "/images/avatar3.webp", name: "Dương Bá" },
     { image: "/images/avtfr.jpg", name: "Nghĩa Hà" },
-    { image: "/images/avatar.png", name: "Dái Bò" },
+    { image: "/images/avatar.png", name: "Hồ Nam" },
     { image: "/images/avatar2.jpg", name: "Hoàng Nam" },
-    { image: "/images/avatar3.webp", name: "Lỏ c" },
+    { image: "/images/avatar3.webp", name: "Dương Bá" },
     { image: "/images/avtfr.jpg", name: "Nghĩa Hà" },
-    { image: "/images/avatar.png", name: "Dái Bò" },
+    { image: "/images/avatar.png", name: "Hồ Nam" },
     { image: "/images/avatar2.jpg", name: "Hoàng Nam" },
-    { image: "/images/avatar3.webp", name: "Lỏ c" },
+    { image: "/images/avatar3.webp", name: "Dương Bá" },
 
   ];
 
@@ -54,7 +54,7 @@ const FriendsPage = () => {
           <div className="w-full pb-4 font-bold text-xl whitespace-nowrap flex">
             Lời mời kết bạn
           </div>
-          <div className="grid grid-cols-5 gap-x-55 gap-y-2">
+          <div className="grid grid-cols-5 gap-x-[230px] gap-y-[30px]">
           {friendRequests.map((request, index) => (
             <FriendReqItem
               key={index}
