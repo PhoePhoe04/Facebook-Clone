@@ -19,6 +19,7 @@ export interface PostType {
   likesCount: number;
   commentsCount: number;
   sharesCount: number;
+  commentList: CommentType[];
   isLiked: boolean;
 }
 
@@ -45,4 +46,16 @@ export interface PostProps {
   isLiked: boolean;
   onLike: (id: number, newLikes: number, newIsLiked: boolean) => void;
   currentUserId: number;
+}
+
+export interface CommentType {
+  id: number;
+  name: string;
+  avatar: string;
+  text: string;
+  timestamp: string;
+  isLiked: boolean;
+  likeCount: number;
+  commentList: CommentType[];
+  image?: string | null;
 }
